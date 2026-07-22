@@ -22,7 +22,7 @@ export default function Header() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
-        <div className="relative mx-auto flex h-20 max-w-[1200px] items-center px-6 lg:px-8">
+        <div className="relative mx-auto flex h-20 max-w-300 items-center px-6 lg:px-8">
           {/* Desktop: logo */}
           <Link
             href="/"
@@ -79,7 +79,7 @@ export default function Header() {
               bottom-0
               h-full
               translate-y-full
-              bg-white/[0.05]
+              bg-white/5
               transition-transform
               duration-500
               ease-[cubic-bezier(0.22,1,0.36,1)]
@@ -114,13 +114,13 @@ export default function Header() {
             >
               <span
                 className={`absolute h-px w-6 bg-foreground transition duration-300 ${
-                  menuOpen ? "translate-y-0 rotate-45" : "-translate-y-[4px]"
+                  menuOpen ? "translate-y-0 rotate-45" : "-translate-y-1"
                 }`}
               />
 
               <span
                 className={`absolute h-px w-6 bg-foreground transition duration-300 ${
-                  menuOpen ? "translate-y-0 -rotate-45" : "translate-y-[4px]"
+                  menuOpen ? "translate-y-0 -rotate-45" : "translate-y-1"
                 }`}
               />
             </button>

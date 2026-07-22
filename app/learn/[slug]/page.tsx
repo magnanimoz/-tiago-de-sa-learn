@@ -22,7 +22,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
     <main className="pt-32">
       <Container>
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl">
+          <div className="relative aspect-4/5 overflow-hidden rounded-3xl">
             <Image
               src={lesson.image}
               alt={lesson.title.pt}
@@ -37,7 +37,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
               {lesson.artist}
             </p>
 
-            <h1 className="mt-6 text-6xl font-medium tracking-[-0.05em]">
+            <h1 className="mt-6 text-6xl font-medium tracking-tighter">
               {lesson.title.pt}
             </h1>
 
