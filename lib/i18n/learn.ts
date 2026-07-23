@@ -2,7 +2,7 @@ import { TranslatedText } from "@/types/translated-text";
 
 export const learnText = {
   learn: {
-    pt: "Aprenda",
+    pt: "Learn",
     en: "Learn",
   },
   title: {

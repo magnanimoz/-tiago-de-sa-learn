@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 import Dropdown from "@/components/ui/Dropdown";
 import { t } from "@/lib/t";
 import { headerText } from "@/lib/i18n/header";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 
 const links = [
   { href: "/", label: headerText.home },
@@ -17,16 +18,47 @@ const links = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { language, setLanguage } = useSettings();
+  const { openLoginModal } = useAuthModal();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const progress = Math.min(window.scrollY / 320, 1);
+      setScrollProgress(progress);
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const backgroundOpacity = 0.88 * scrollProgress;
+  const borderOpacity = 0.1 * scrollProgress;
+  const blurAmount = 18 * scrollProgress;
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
+      <header
+        className="fixed inset-x-0 top-0 z-50 transition-shadow duration-300"
+        style={{
+          backgroundColor: `rgba(16, 16, 18, ${backgroundOpacity})`,
+          borderBottom: `1px solid rgba(255, 255, 255, ${borderOpacity})`,
+          backdropFilter: `blur(${blurAmount}px)`,
+          WebkitBackdropFilter: `blur(${blurAmount}px)`,
+          boxShadow:
+            scrollProgress > 0.7 ? "0 12px 40px rgba(0, 0, 0, 0.18)" : "none",
+        }}
+      >
         <div className="relative mx-auto flex h-20 max-w-300 items-center px-6 lg:px-8">
           {/* Desktop: logo */}
           <Link
             href="/"
-            className="text-lg font-semibold tracking-[-0.03em] max-[991px]:hidden"
+            className="text-lg font-semibold tracking-[-0.03em] text-white max-[991px]:hidden"
           >
             Tiago de Sá
           </Link>
@@ -37,7 +69,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="inline-flex text-base text-muted transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.04] hover:text-foreground"
+                className="inline-flex text-base text-white/70 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.04] hover:text-white"
               >
                 {t(link.label, language)}
               </Link>
@@ -50,7 +82,7 @@ export default function Header() {
               trigger={
                 <button
                   type="button"
-                  className="text-sm text-muted transition-colors hover:text-foreground"
+                  className="text-sm text-white/70 transition-colors hover:text-white"
                 >
                   {language === "pt" ? "🇧🇷 PT" : "🇺🇸 EN"}
                 </button>
@@ -68,38 +100,41 @@ export default function Header() {
             </Dropdown>
 
             {/* Desktop: login */}
-            <Link
-              href="/login"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-border px-6 py-2.5 text-base font-medium transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-[991px]:hidden"
+            <button
+              type="button"
+              onClick={openLoginModal}
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-white/20 px-6 py-2.5 text-base font-medium text-white transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-[991px]:hidden"
             >
               <span
                 className="
-              absolute
-              inset-x-0
-              bottom-0
-              h-full
-              translate-y-full
-              bg-white/5
-              transition-transform
-              duration-500
-              ease-[cubic-bezier(0.22,1,0.36,1)]
-              group-hover:translate-y-0
-            "
+                  absolute
+                  inset-x-0
+                  bottom-0
+                  h-full
+                  translate-y-full
+                  bg-white/10
+                  transition-transform
+                  duration-500
+                  ease-[cubic-bezier(0.22,1,0.36,1)]
+                  group-hover:translate-y-0
+                "
               />
+
               <span className="relative z-10">
                 {t(headerText.login, language)}
               </span>
-            </Link>
+            </button>
           </div>
 
           {/* Tablet/mobile */}
           <div className="ml-auto hidden items-center gap-5 max-[991px]:flex max-[991px]:animate-header-enter">
-            <Link
-              href="/login"
-              className="text-sm text-muted transition-colors hover:text-foreground"
+            <button
+              type="button"
+              onClick={openLoginModal}
+              className="text-sm text-white/70 transition-colors hover:text-white"
             >
               {t(headerText.login, language)}
-            </Link>
+            </button>
 
             <button
               type="button"
@@ -113,13 +148,13 @@ export default function Header() {
               aria-expanded={menuOpen}
             >
               <span
-                className={`absolute h-px w-6 bg-foreground transition duration-300 ${
+                className={`absolute h-px w-6 bg-white transition duration-300 ${
                   menuOpen ? "translate-y-0 rotate-45" : "-translate-y-1"
                 }`}
               />
 
               <span
-                className={`absolute h-px w-6 bg-foreground transition duration-300 ${
+                className={`absolute h-px w-6 bg-white transition duration-300 ${
                   menuOpen ? "translate-y-0 -rotate-45" : "translate-y-1"
                 }`}
               />
@@ -130,7 +165,7 @@ export default function Header() {
 
       {/* Menu mobile */}
       <div
-        className={`fixed inset-0 z-40 bg-background transition-all duration-500 min-[992px]:hidden ${
+        className={`fixed inset-0 z-40 bg-[#101012] transition-all duration-500 min-[992px]:hidden ${
           menuOpen
             ? "pointer-events-auto visible opacity-100"
             : "pointer-events-none invisible opacity-0"
@@ -146,7 +181,7 @@ export default function Header() {
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="border-b border-border py-5 text-4xl tracking-[-0.04em] transition-colors hover:text-magenta"
+              className="border-b border-white/10 py-5 text-4xl tracking-[-0.04em] text-white transition-colors hover:text-[#e6007e]"
               style={{
                 transitionDelay: menuOpen ? `${index * 60}ms` : "0ms",
               }}

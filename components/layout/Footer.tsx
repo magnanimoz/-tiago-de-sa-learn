@@ -1,7 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { FaInstagram, FaYoutube } from "react-icons/fa6";
+import { useSettings } from "@/contexts/SettingsContext";
+import { t } from "@/lib/t";
+import { footerText } from "@/lib/i18n/footer";
+import { footer } from "framer-motion/client";
 
 export default function Footer() {
+  const { language } = useSettings();
+
   return (
     <footer className="mt-32 border-t border-border/60">
       <div className="mx-auto max-w-7xl px-8 py-16">
@@ -15,7 +23,7 @@ export default function Footer() {
             </Link>
 
             <p className="mt-5 max-w-xs text-sm leading-6 text-muted">
-              Aulas, arranjos e recursos para guitarristas.
+              {t(footerText.description, language)}
             </p>
 
             <div className="mt-6 flex items-center gap-4">
@@ -39,7 +47,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-lg font-medium tracking-[-0.02em] text-white">
-              Links
+              {t(footerText.links, language)}
             </h3>
 
             <nav className="mt-5 flex flex-col gap-4 text-base text-muted">
@@ -47,28 +55,28 @@ export default function Footer() {
                 href="/learn"
                 className="inline-flex transition-all duration-500 ease-out hover:translate-x-[7px] hover:text-white"
               >
-                Aulas
+                {t(footerText.lessons, language)}
               </Link>
 
               <Link
                 href="/about"
                 className="inline-flex transition-all duration-500 ease-out hover:translate-x-[7px] hover:text-white"
               >
-                Sobre
+                {t(footerText.about, language)}
               </Link>
 
               <Link
                 href="/contact"
                 className="inline-flex transition-all duration-500 ease-out hover:translate-x-[7px] hover:text-white"
               >
-                Contato
+                {t(footerText.contact, language)}
               </Link>
             </nav>
           </div>
 
           <div>
             <h3 className="text-lg font-medium tracking-[-0.02em] text-white">
-              Conta
+              {t(footerText.account, language)}
             </h3>
 
             <nav className="mt-5 flex flex-col gap-4 text-base text-muted">
@@ -76,38 +84,38 @@ export default function Footer() {
                 href="/login"
                 className="inline-flex transition-all duration-500 ease-out hover:translate-x-[7px] hover:text-white"
               >
-                Entrar
+                {t(footerText.login, language)}
               </Link>
 
               <Link
                 href="/account"
                 className="inline-flex transition-all duration-500 ease-out hover:translate-x-[7px] hover:text-white"
               >
-                Minha conta
+                {t(footerText.myAccount, language)}
               </Link>
 
               <Link
                 href="/purchases"
                 className="inline-flex transition-all duration-500 ease-out hover:translate-x-[7px] hover:text-white"
               >
-                Minhas compras
+                {t(footerText.myPurchases, language)}
               </Link>
             </nav>
           </div>
 
           <div>
             <h3 className="text-lg font-medium tracking-[-0.02em] text-white">
-              Novidades
+              {t(footerText.news, language)}
             </h3>
 
             <p className="mt-5 text-sm leading-6 text-muted">
-              Receba novas aulas e conteúdos por e-mail.
+              {t(footerText.receive, language)}
             </p>
 
             <div className="mt-5 flex border-b border-border pb-2">
               <input
                 type="email"
-                placeholder="Seu e-mail"
+                placeholder={t(footerText.yourEmail, language)}
                 className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-muted"
               />
 
@@ -115,7 +123,7 @@ export default function Footer() {
                 type="button"
                 className="text-sm text-white transition-colors duration-300 hover:text-magenta"
               >
-                Enviar
+                {t(footerText.send, language)}
               </button>
             </div>
           </div>
