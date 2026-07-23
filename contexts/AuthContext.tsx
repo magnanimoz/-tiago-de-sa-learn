@@ -17,6 +17,11 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   signOut: () => Promise<void>;
   updateName: (name: string) => Promise<void>;
+  updatePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<void>;
+  updateEmail: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -85,6 +90,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(data.user);
   }
 
+  async function updatePassword(currentPassword: string, newPassword: string) {
+    if (!user?.email) {
+      throw new Error("Não foi possível identificar o e-mail da conta.");
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+
+    if (signInError) {
+      throw new Error("A senha atual está incorreta.");
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      throw updateError;
+    }
+  }
+
+  async function updateEmail(email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      throw new Error("Informe um e-mail válido.");
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      email: normalizedEmail,
+    });
+
+    if (error) {
+      throw error;
+    }
+  }
+
   const value = useMemo(
     () => ({
       user,
@@ -92,6 +136,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: Boolean(user),
       signOut,
       updateName,
+      updatePassword,
+      updateEmail,
     }),
     [user, isLoading],
   );

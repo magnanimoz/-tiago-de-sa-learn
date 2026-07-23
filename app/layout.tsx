@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 import Footer from "@/components/layout/Footer";
-import Providers from "./providers";
 import LoginModal from "@/components/auth/LoginModal";
+import Providers from "./providers";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -29,6 +30,8 @@ export default function RootLayout({
           {children}
           <Footer />
           <LoginModal />
+
+          <Toaster position="top-right" richColors closeButton />
         </Providers>
       </body>
     </html>

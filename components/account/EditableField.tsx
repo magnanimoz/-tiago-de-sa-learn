@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Pencil, X } from "lucide-react";
+import { Check, LoaderCircle, Pencil, X } from "lucide-react";
+import { toast } from "sonner";
 
 type EditableFieldProps = {
   label: string;
@@ -15,6 +16,7 @@ export default function EditableField({
   onSave,
 }: EditableFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [currentValue, setCurrentValue] = useState(value);
 
   useEffect(() => {
@@ -23,24 +25,40 @@ export default function EditableField({
     }
   }, [value, isEditing]);
 
-  const hasChanges = currentValue.trim() !== value.trim();
+  const trimmedValue = currentValue.trim();
+  const hasChanges = trimmedValue !== value.trim();
+  const canSave = hasChanges && Boolean(trimmedValue);
 
   async function handleSave() {
-    const trimmedValue = currentValue.trim();
-
-    if (!hasChanges || !trimmedValue) {
+    if (!canSave || isSaving) {
       return;
     }
 
-    if (onSave) {
-      await onSave(trimmedValue);
-    }
+    try {
+      setIsSaving(true);
 
-    setCurrentValue(trimmedValue);
-    setIsEditing(false);
+      if (onSave) {
+        await onSave(trimmedValue);
+      }
+
+      setCurrentValue(trimmedValue);
+      setIsEditing(false);
+
+      toast.success("Nome atualizado com sucesso.");
+    } catch (error) {
+      console.error(`Erro ao salvar ${label}:`, error);
+
+      toast.error("Não foi possível atualizar o nome.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function handleCancel() {
+    if (isSaving) {
+      return;
+    }
+
     setCurrentValue(value);
     setIsEditing(false);
   }
@@ -68,27 +86,34 @@ export default function EditableField({
             type="text"
             value={currentValue}
             onChange={(event) => setCurrentValue(event.target.value)}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 pr-20 text-white outline-none transition focus:border-indigo-500"
+            disabled={isSaving}
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 pr-20 text-white outline-none transition focus:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
           />
 
           <div className="absolute inset-y-0 right-3 flex items-center gap-2">
             <button
               type="button"
               onClick={handleCancel}
-              className="text-white/50 transition hover:text-white"
+              disabled={isSaving}
+              className="text-white/50 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Cancelar"
             >
               <X size={18} />
             </button>
 
-            {hasChanges && currentValue.trim() && (
+            {canSave && (
               <button
                 type="button"
                 onClick={handleSave}
-                className="text-emerald-400 transition hover:text-emerald-300"
-                aria-label="Salvar"
+                disabled={isSaving}
+                className="text-emerald-400 transition hover:text-emerald-300 disabled:cursor-not-allowed"
+                aria-label={isSaving ? "Salvando" : "Salvar"}
               >
-                <Check size={18} />
+                {isSaving ? (
+                  <LoaderCircle size={18} className="animate-spin" />
+                ) : (
+                  <Check size={18} />
+                )}
               </button>
             )}
           </div>
