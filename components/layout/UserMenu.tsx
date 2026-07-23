@@ -7,9 +7,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { headerText } from "@/lib/i18n/header";
 import { t } from "@/lib/t";
+import { useRouter } from "next/navigation";
 
 export default function UserMenu() {
   const { user, signOut } = useAuth();
+  const router = useRouter();
   const { language } = useSettings();
 
   async function handleSignOut() {
@@ -17,7 +19,7 @@ export default function UserMenu() {
   }
 
   function handleMyAccount() {
-    console.log("Minha conta ainda será implementada.");
+    router.push("/account");
   }
 
   function handleMyPurchases() {

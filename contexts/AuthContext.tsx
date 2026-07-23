@@ -16,6 +16,7 @@ type AuthContextValue = {
   isLoading: boolean;
   isAuthenticated: boolean;
   signOut: () => Promise<void>;
+  updateName: (name: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -64,12 +65,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   }
 
+  async function updateName(name: string) {
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
+      throw new Error("O nome não pode ficar vazio.");
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      data: {
+        name: trimmedName,
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    setUser(data.user);
+  }
+
   const value = useMemo(
     () => ({
       user,
       isLoading,
       isAuthenticated: Boolean(user),
       signOut,
+      updateName,
     }),
     [user, isLoading],
   );
