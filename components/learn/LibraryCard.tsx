@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Price } from "@/types/price";
 import { formatPrice } from "@/lib/format-price";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 
 type LibraryCardProps = {
   title: string;
@@ -19,9 +20,16 @@ export default function LibraryCard({
   price,
   currency,
 }: LibraryCardProps) {
+  const { openLoginModal } = useAuthModal();
+  function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    openLoginModal();
+  }
+
   return (
     <Link
       href={href}
+      onClick={handleClick}
       className="group/card block w-[320px] flex-shrink-0 transition-transform duration-700 ease-out hover:scale-[1.07]"
     >
       <div className="relative aspect-[369/207] overflow-hidden rounded-2xl bg-card">

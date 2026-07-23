@@ -7,6 +7,8 @@ import Dropdown from "@/components/ui/Dropdown";
 import { t } from "@/lib/t";
 import { headerText } from "@/lib/i18n/header";
 import { useAuthModal } from "@/contexts/AuthModalContext";
+import { useAuth } from "@/contexts/AuthContext";
+import UserMenu from "@/components/layout/UserMenu";
 
 const links = [
   { href: "/", label: headerText.home },
@@ -21,6 +23,7 @@ export default function Header() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const { language, setLanguage } = useSettings();
   const { openLoginModal } = useAuthModal();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,30 +103,34 @@ export default function Header() {
             </Dropdown>
 
             {/* Desktop: login */}
-            <button
-              type="button"
-              onClick={openLoginModal}
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-white/20 px-6 py-2.5 text-base font-medium text-white transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-[991px]:hidden"
-            >
-              <span
-                className="
-                  absolute
-                  inset-x-0
-                  bottom-0
-                  h-full
-                  translate-y-full
-                  bg-white/10
-                  transition-transform
-                  duration-500
-                  ease-[cubic-bezier(0.22,1,0.36,1)]
-                  group-hover:translate-y-0
-                "
-              />
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <button
+                type="button"
+                onClick={openLoginModal}
+                className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-white/20 px-6 py-2.5 text-base font-medium text-white transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] max-[991px]:hidden"
+              >
+                <span
+                  className="
+        absolute
+        inset-x-0
+        bottom-0
+        h-full
+        translate-y-full
+        bg-white/10
+        transition-transform
+        duration-500
+        ease-[cubic-bezier(0.22,1,0.36,1)]
+        group-hover:translate-y-0
+      "
+                />
 
-              <span className="relative z-10">
-                {t(headerText.login, language)}
-              </span>
-            </button>
+                <span className="relative z-10">
+                  {t(headerText.login, language)}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Tablet/mobile */}

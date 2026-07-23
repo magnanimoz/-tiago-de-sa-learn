@@ -1,50 +1,67 @@
 "use client";
 
-import LoginForm from "./LoginForm";
-import LoginHeader from "./LoginHeader";
-import SocialLoginButton from "./SocialLoginButton";
+import { useState } from "react";
+
 import { useSettings } from "@/contexts/SettingsContext";
 import { modalText } from "@/lib/i18n/modal";
 import { t } from "@/lib/t";
 
+import LoginForm from "./LoginForm";
+import LoginHeader from "./LoginHeader";
+import SocialLoginButton from "./SocialLoginButton";
+
 export default function LoginCard() {
   const { language } = useSettings();
+  const [isSignUp, setIsSignUp] = useState(false);
 
   return (
     <div
-      className="
+      className={`
         w-full
         rounded-3xl
         border border-white/10
-        border-1
-      bg-[#101012]
-        p-7
+        bg-[#101012]
         shadow-md
-        md:p-8
-      "
+md:p-8
+      `}
     >
-      <LoginHeader />
-      <LoginForm />
+      <LoginHeader isSignUp={isSignUp} />
 
-      <div className="my-8 flex items-center gap-4">
-        <div className="h-px flex-1 bg-[#a1a1a1]" />
+      <LoginForm isSignUp={isSignUp} />
 
-        <span className="text-xs uppercase tracking-[0.3em] text-[#a1a1a1]">
-          {t(modalText.or, language)}
-        </span>
+      {!isSignUp && (
+        <>
+          <div className="my-8 flex items-center gap-4">
+            <div className="h-px flex-1 bg-[#a1a1a1]" />
 
-        <div className="h-px flex-1 bg-[#a1a1a1]" />
-      </div>
+            <span className="text-xs uppercase tracking-[0.3em] text-[#a1a1a1]">
+              {t(modalText.or, language)}
+            </span>
 
-      <SocialLoginButton />
+            <div className="h-px flex-1 bg-[#a1a1a1]" />
+          </div>
 
-      <p className="mt-8 text-center text-base text-[#a1a1a1]">
-        {t(modalText.newUser, language)}{" "}
+          <SocialLoginButton />
+        </>
+      )}
+
+      <p
+        className={`
+          text-center text-base text-[#a1a1a1]
+          ${isSignUp ? "mt-5" : "mt-8"}
+        `}
+      >
+        {isSignUp
+          ? t(modalText.alreadyHaveAccount, language)
+          : t(modalText.newUser, language)}{" "}
         <button
           type="button"
+          onClick={() => setIsSignUp((currentValue) => !currentValue)}
           className="font-bold text-[#e6007e] transition hover:text-[#ca006f]"
         >
-          {t(modalText.createAnAccount, language)}
+          {isSignUp
+            ? t(modalText.singIn, language)
+            : t(modalText.createAnAccount, language)}
         </button>
       </p>
     </div>
