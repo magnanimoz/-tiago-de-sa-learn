@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { Price } from "@/types/price";
+import { useSettings } from "@/contexts/SettingsContext";
+import { localePath } from "@/lib/locale-path";
+import type { Price } from "@/types/price";
 import { formatPrice } from "@/lib/format-price";
-import { useAuthModal } from "@/contexts/AuthModalContext";
 
 type LibraryCardProps = {
   title: string;
@@ -10,6 +13,7 @@ type LibraryCardProps = {
   href: string;
   price: Price;
   currency: "BRL" | "USD";
+  acquired?: boolean;
 };
 
 export default function LibraryCard({
@@ -19,17 +23,15 @@ export default function LibraryCard({
   href,
   price,
   currency,
+  acquired = false,
 }: LibraryCardProps) {
-  const { openLoginModal } = useAuthModal();
-  function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
-    event.preventDefault();
-    openLoginModal();
-  }
+  const { routeLocale } = useSettings();
+
+  const localizedHref = localePath(href, routeLocale);
 
   return (
     <Link
-      href={href}
-      onClick={handleClick}
+      href={localizedHref}
       className="group/card block w-[320px] flex-shrink-0 transition-transform duration-700 ease-out hover:scale-[1.07]"
     >
       <div className="relative aspect-[369/207] overflow-hidden rounded-2xl bg-card">
@@ -74,9 +76,15 @@ export default function LibraryCard({
         </div>
 
         <div className="absolute right-3 top-2">
-          <span className="rounded-full border border-white/10 bg-zinc-950/80 px-3 py-1 text-[11px] font-medium tracking-wide text-zinc-400 backdrop-blur-xl">
-            {formatPrice(price, currency)}
-          </span>
+          {acquired ? (
+            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium tracking-wide text-emerald-300 backdrop-blur-xl">
+              ✓ Adquirido
+            </span>
+          ) : (
+            <span className="rounded-full border border-white/10 bg-zinc-950/80 px-3 py-1 text-[11px] font-medium tracking-wide text-zinc-400 backdrop-blur-xl">
+              {formatPrice(price, currency)}
+            </span>
+          )}
         </div>
 
         <div className="absolute inset-x-0 bottom-0 p-4">

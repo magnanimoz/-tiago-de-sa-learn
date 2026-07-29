@@ -12,10 +12,8 @@ export default function LoginHero() {
     offset: ["start start", "end start"],
   });
 
-  // A imagem desce suavemente enquanto a página sobe.
   const imageY = useTransform(scrollYProgress, [0, 1], [0, 55]);
 
-  // Pequeno zoom evita aparecerem espaços vazios nas bordas.
   const imageScale = useTransform(scrollYProgress, [0, 1], [1.08, 1.14]);
 
   return (
@@ -40,7 +38,6 @@ export default function LoginHero() {
         />
       </motion.div>
 
-      {/* Escurecimento para melhorar a leitura do título e da navbar */}
       <div className="absolute inset-0 bg-black/45" />
 
       <div className="relative z-10 flex h-full items-center justify-center pt-15">

@@ -1,5 +1,5 @@
 import LibraryCard from "@/components/learn/LibraryCard";
-import { LibraryItem } from "@/types/library-item";
+import type { LibraryItem } from "@/types/library-item";
 import { t } from "@/lib/t";
 import { AnimatePresence, motion } from "framer-motion";
 

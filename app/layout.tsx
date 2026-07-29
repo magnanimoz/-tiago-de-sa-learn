@@ -3,8 +3,8 @@ import { Space_Grotesk } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
+import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import LoginModal from "@/components/auth/LoginModal";
 import Providers from "./providers";
 
 const spaceGrotesk = Space_Grotesk({
@@ -27,9 +27,9 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={spaceGrotesk.variable}>
         <Providers>
+          <Header />
           {children}
           <Footer />
-          <LoginModal />
 
           <Toaster position="top-right" richColors closeButton />
         </Providers>

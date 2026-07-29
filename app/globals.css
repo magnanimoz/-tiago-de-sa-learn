@@ -42,7 +42,6 @@ button,
 input,
 textarea {
   font-family: inherit;
-  font-size: inherit;
 }
 
 button {
@@ -105,4 +104,60 @@ button {
     transform: scale(1);
     filter: blur(48px);
   }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.05) inset;
+  box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0) inset;
+
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+@keyframes lessonAmberReveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(80px, 50px, 0) scale(0.72);
+    filter: blur(120px);
+  }
+
+  35% {
+    opacity: 0.25;
+  }
+
+  65% {
+    opacity: 0.72;
+    transform: translate3d(20px, 10px, 0) scale(0.96);
+    filter: blur(85px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.08);
+    filter: blur(70px);
+  }
+}
+
+@keyframes lessonDarken {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@utility animate-lesson-amber {
+  animation: lessonAmberReveal 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@utility animate-lesson-darken {
+  animation: lessonDarken 2s ease-out forwards;
 }

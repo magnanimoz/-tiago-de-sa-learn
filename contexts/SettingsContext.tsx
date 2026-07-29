@@ -1,45 +1,66 @@
 "use client";
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
-export type Language = "pt" | "en";
+import {
+  defaultRouteLocale,
+  isRouteLocale,
+  languageToRouteLocale,
+  routeLocaleToCurrency,
+  routeLocaleToLanguage,
+  type Locale,
+  type RouteLocale,
+} from "@/lib/i18n";
+
 export type Currency = "BRL" | "USD";
 
 interface SettingsContextData {
-  language: Language;
+  language: Locale;
   currency: Currency;
-  setLanguage: (language: Language) => void;
+  routeLocale: RouteLocale;
+  setLanguage: (language: Locale) => void;
 }
 
 const SettingsContext = createContext<SettingsContextData | null>(null);
 
+function getRouteLocaleFromPathname(pathname: string): RouteLocale {
+  const firstSegment = pathname.split("/").filter(Boolean)[0];
+
+  if (firstSegment && isRouteLocale(firstSegment)) {
+    return firstSegment;
+  }
+
+  return defaultRouteLocale;
+}
+
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("pt");
+  const pathname = usePathname();
+  const router = useRouter();
 
-  useEffect(() => {
-    const saved = localStorage.getItem("language");
+  const routeLocale = getRouteLocaleFromPathname(pathname);
+  const language = routeLocaleToLanguage(routeLocale);
+  const currency = routeLocaleToCurrency(routeLocale);
 
-    if (saved === "pt" || saved === "en") {
-      setLanguage(saved);
+  function handleSetLanguage(nextLanguage: Locale) {
+    const nextRouteLocale = languageToRouteLocale(nextLanguage);
+    const segments = pathname.split("/").filter(Boolean);
+
+    if (segments[0] && isRouteLocale(segments[0])) {
+      segments[0] = nextRouteLocale;
+    } else {
+      segments.unshift(nextRouteLocale);
     }
-  }, []);
 
-  function handleSetLanguage(language: Language) {
-    localStorage.setItem("language", language);
-    setLanguage(language);
+    router.push(`/${segments.join("/")}`);
   }
 
   return (
     <SettingsContext.Provider
       value={{
         language,
-        currency: language === "pt" ? "BRL" : "USD",
+        currency,
+        routeLocale,
         setLanguage: handleSetLanguage,
       }}
     >

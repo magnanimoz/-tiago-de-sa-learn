@@ -4,9 +4,16 @@ import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
+import type { Locale } from "@/lib/i18n";
+import { accountText } from "@/lib/i18n/account";
+import { t } from "@/lib/t";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function UpdateEmailForm() {
+type UpdateEmailFormProps = {
+  language: Locale;
+};
+
+export default function UpdateEmailForm({ language }: UpdateEmailFormProps) {
   const { user, updateEmail } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -28,14 +35,16 @@ export default function UpdateEmailForm() {
 
       await updateEmail(email);
 
-      toast.success(`Enviamos um e-mail de confirmação para ${email}.`);
+      toast.success(
+        `${t(accountText.security.emailConfirmationSent, language)} ${email}.`,
+      );
 
       setEmail("");
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
       } else {
-        toast.error("Não foi possível atualizar o e-mail.");
+        toast.error(t(accountText.security.emailUpdatedError, language));
       }
     } finally {
       setIsSaving(false);
@@ -45,7 +54,9 @@ export default function UpdateEmailForm() {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
       <div>
-        <p className="text-sm font-medium text-white/60">E-mail atual</p>
+        <p className="text-sm font-medium text-white/60">
+          {t(accountText.security.currentEmail, language)}
+        </p>
 
         <p className="mt-1 text-white">{user?.email}</p>
       </div>
@@ -56,7 +67,7 @@ export default function UpdateEmailForm() {
             htmlFor="new-email"
             className="mb-2 block text-sm font-medium text-white/60"
           >
-            Novo e-mail
+            {t(accountText.security.newEmail, language)}
           </label>
 
           <input
@@ -78,7 +89,7 @@ export default function UpdateEmailForm() {
           {isSaving ? (
             <LoaderCircle size={18} className="animate-spin" />
           ) : (
-            "Atualizar e-mail"
+            t(accountText.security.updateEmail, language)
           )}
         </button>
       </form>

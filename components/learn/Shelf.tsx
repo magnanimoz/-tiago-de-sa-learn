@@ -44,10 +44,6 @@ export default function Shelf({
 
     const amount = direction === "left" ? -scrollAmount : scrollAmount;
 
-    console.log("direction:", direction);
-    console.log("amount:", amount);
-    console.log("scrollLeft antes:", shelf.scrollLeft);
-
     shelf.scrollBy({
       left: amount,
       behavior: "smooth",
@@ -82,7 +78,7 @@ export default function Shelf({
   const itemCount = Children.count(children);
 
   return (
-    <section className={`mt-20 ${className}`}>
+    <section className={`mt-10 ${className}`}>
       {/* Header */}
       <div className="relative left-1/2 w-screen -translate-x-1/2">
         <div className="flex items-center justify-between px-6 lg:px-8">

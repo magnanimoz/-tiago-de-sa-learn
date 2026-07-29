@@ -2,7 +2,7 @@ import { TranslatedText } from "@/types/translated-text";
 
 export const learnText = {
   learn: {
-    pt: "Learn",
+    pt: "Aprenda",
     en: "Learn",
   },
   title: {
@@ -30,6 +30,11 @@ export const learnText = {
     en: "Recently Added",
   },
 
+  songs: {
+    pt: "Músicas",
+    en: "Songs",
+  },
+
   courses: {
     pt: "Cursos",
     en: "Courses",
@@ -38,5 +43,15 @@ export const learnText = {
   packs: {
     pt: "Packs",
     en: "Packs",
+  },
+
+  content: {
+    pt: "Conteúdo",
+    en: "Content",
+  },
+
+  myPurchases: {
+    pt: "Minhas compras",
+    en: "My purchases",
   },
 } satisfies Record<string, TranslatedText>;

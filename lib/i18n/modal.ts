@@ -2,7 +2,7 @@ import { TranslatedText } from "@/types/translated-text";
 
 export const modalText = {
   login: {
-    pt: "Entrar",
+    pt: "Faça",
     en: "Login",
   },
   Email: {

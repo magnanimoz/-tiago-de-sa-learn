@@ -1,10 +1,26 @@
 import LibraryCardGrid from "@/components/learn/LibraryCardGrid";
-import { getLibraryItems } from "@/lib/learn/library-items";
+
+type SearchItem = {
+  slug: string;
+  type: "song" | "course" | "pack";
+  title: {
+    pt: string;
+    en: string;
+  };
+  artist?: string;
+  price: {
+    brl: number;
+    usd: number;
+  };
+  image: string;
+  href: string;
+};
 
 type SearchResultsProps = {
   search: string;
   language: "pt" | "en";
   currency: "BRL" | "USD";
+  items: SearchItem[];
 };
 
 function normalizeText(value: string) {
@@ -19,10 +35,11 @@ export default function SearchResults({
   search,
   language,
   currency,
+  items,
 }: SearchResultsProps) {
   const query = normalizeText(search);
 
-  const results = getLibraryItems().filter((item) => {
+  const results = items.filter((item) => {
     const titles = Object.values(item.title);
     const artist = item.artist ?? "";
 

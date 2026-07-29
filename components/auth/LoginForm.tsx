@@ -1,25 +1,29 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { useAuthModal } from "@/contexts/AuthModalContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { localePath } from "@/lib/locale-path";
 import { modalText } from "@/lib/i18n/modal";
 import { createClient } from "@/lib/supabase/client";
 import { t } from "@/lib/t";
+import { Eye, EyeOff } from "lucide-react";
 
 interface LoginFormProps {
   isSignUp: boolean;
 }
 
 export default function LoginForm({ isSignUp }: LoginFormProps) {
-  const { language } = useSettings();
-  const { closeLoginModal } = useAuthModal();
+  const router = useRouter();
+  const { language, routeLocale } = useSettings();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -63,11 +67,6 @@ export default function LoginForm({ isSignUp }: LoginFormProps) {
       setConfirmPassword("");
       setIsSubmitting(false);
 
-      if (data.session) {
-        closeLoginModal();
-        return;
-      }
-
       setSuccessMessage(t(modalText.checkYourEmail, language));
       return;
     }
@@ -87,7 +86,8 @@ export default function LoginForm({ isSignUp }: LoginFormProps) {
     setPassword("");
     setIsSubmitting(false);
 
-    closeLoginModal();
+    router.replace(localePath("/learn", routeLocale));
+    router.refresh();
   }
 
   return (
@@ -170,31 +170,51 @@ export default function LoginForm({ isSignUp }: LoginFormProps) {
           {t(modalText.password, language)}
         </label>
 
-        <input
-          id="auth-password"
-          name="password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="••••••••"
-          autoComplete={isSignUp ? "new-password" : "current-password"}
-          required
-          minLength={6}
-          className="
-            h-12 w-full
-            rounded-2xl
-            border border-white/20
-            bg-[#101012]/20
-            px-4
-            text-sm text-white
-            outline-none
-            transition duration-200
-            placeholder:text-[#a1a1a1]/50
-            focus:border-white/40
-            focus:ring-1
-            focus:ring-[#a1a1a1]/20
-          "
-        />
+        <div className="relative">
+          <input
+            id="auth-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="••••••••"
+            autoComplete={isSignUp ? "new-password" : "current-password"}
+            required
+            minLength={6}
+            className="
+              h-12 w-full
+              rounded-2xl
+              border border-white/20
+              bg-[#101012]/20
+              px-4
+              pr-12
+              text-sm text-white
+              outline-none
+              transition duration-200
+              placeholder:text-[#a1a1a1]/50
+              focus:border-white/40
+              focus:ring-1
+              focus:ring-[#a1a1a1]/20
+            "
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword((current) => !current)}
+            className="absolute inset-y-0 right-4 flex items-center text-white/40 transition hover:text-white"
+            aria-label={
+              showPassword
+                ? language === "pt"
+                  ? "Ocultar senha"
+                  : "Hide password"
+                : language === "pt"
+                  ? "Mostrar senha"
+                  : "Show password"
+            }
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
       {isSignUp && (

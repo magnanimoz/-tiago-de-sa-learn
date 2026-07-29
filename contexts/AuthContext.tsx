@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 type AuthContextValue = {
   user: User | null;
@@ -31,6 +32,8 @@ type AuthProviderProps = {
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter();
+
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -68,6 +71,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     setUser(null);
+
+    router.replace("/");
+    router.refresh();
   }
 
   async function updateName(name: string) {

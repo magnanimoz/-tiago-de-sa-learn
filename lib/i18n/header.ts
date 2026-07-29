@@ -7,7 +7,7 @@ export const headerText = {
   },
 
   learn: {
-    pt: "Learn",
+    pt: "Aprenda",
     en: "Learn",
   },
 

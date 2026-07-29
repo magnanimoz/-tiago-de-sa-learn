@@ -1,29 +1,35 @@
 "use client";
 
 import { CreditCard, LogOut, UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import Dropdown from "@/components/ui/Dropdown";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { headerText } from "@/lib/i18n/header";
+import { localePath } from "@/lib/locale-path";
 import { t } from "@/lib/t";
-import { useRouter } from "next/navigation";
 
 export default function UserMenu() {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const { language } = useSettings();
+  const { language, routeLocale } = useSettings();
 
   async function handleSignOut() {
-    await signOut();
+    try {
+      await signOut();
+      router.push(localePath("/", routeLocale));
+    } catch (error) {
+      console.error("Erro ao sair da conta:", error);
+    }
   }
 
   function handleMyAccount() {
-    router.push("/account");
+    router.push(localePath("/account/profile", routeLocale));
   }
 
   function handleMyPurchases() {
-    console.log("Minhas compras ainda será implementado.");
+    router.push(localePath("/account/purchases", routeLocale));
   }
 
   return (

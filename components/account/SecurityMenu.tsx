@@ -2,12 +2,18 @@
 
 import { ChevronRight, KeyRound, Mail } from "lucide-react";
 
+import type { Locale } from "@/lib/i18n";
+import { accountText } from "@/lib/i18n/account";
+import { t } from "@/lib/t";
+
 type SecurityMenuProps = {
+  language: Locale;
   onPasswordClick: () => void;
   onEmailClick: () => void;
 };
 
 export default function SecurityMenu({
+  language,
   onPasswordClick,
   onEmailClick,
 }: SecurityMenuProps) {
@@ -21,10 +27,12 @@ export default function SecurityMenu({
         <KeyRound size={20} className="text-white/60" />
 
         <div className="flex-1">
-          <p className="font-medium text-white">Alterar senha</p>
+          <p className="font-medium text-white">
+            {t(accountText.security.changePassword, language)}
+          </p>
 
           <p className="mt-1 text-sm text-white/50">
-            Altere sua senha para manter sua conta protegida.
+            {t(accountText.security.passwordDescription, language)}
           </p>
         </div>
 
@@ -44,10 +52,12 @@ export default function SecurityMenu({
         <Mail size={20} className="text-white/60" />
 
         <div className="flex-1">
-          <p className="font-medium text-white">Alterar e-mail</p>
+          <p className="font-medium text-white">
+            {t(accountText.security.changeEmail, language)}
+          </p>
 
           <p className="mt-1 text-sm text-white/50">
-            Escolha um novo endereço de e-mail para sua conta.
+            {t(accountText.security.emailDescription, language)}
           </p>
         </div>
 

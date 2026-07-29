@@ -4,9 +4,18 @@ import { useState } from "react";
 import { Eye, EyeOff, LoaderCircle, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
+import type { Locale } from "@/lib/i18n";
+import { accountText } from "@/lib/i18n/account";
+import { t } from "@/lib/t";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function UpdatePasswordForm() {
+type UpdatePasswordFormProps = {
+  language: Locale;
+};
+
+export default function UpdatePasswordForm({
+  language,
+}: UpdatePasswordFormProps) {
   const { updatePassword } = useAuth();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -21,23 +30,26 @@ export default function UpdatePasswordForm() {
 
   const passwordRequirements = [
     {
-      label: "Pelo menos 8 caracteres",
+      label: t(accountText.security.passwordRequirements.minLength, language),
       isValid: password.length >= 8,
     },
     {
-      label: "Uma letra maiúscula",
+      label: t(accountText.security.passwordRequirements.uppercase, language),
       isValid: /[A-Z]/.test(password),
     },
     {
-      label: "Uma letra minúscula",
+      label: t(accountText.security.passwordRequirements.lowercase, language),
       isValid: /[a-z]/.test(password),
     },
     {
-      label: "Um número",
+      label: t(accountText.security.passwordRequirements.number, language),
       isValid: /\d/.test(password),
     },
     {
-      label: "Um caractere especial",
+      label: t(
+        accountText.security.passwordRequirements.specialCharacter,
+        language,
+      ),
       isValid: /[^A-Za-z0-9]/.test(password),
     },
   ];
@@ -63,7 +75,7 @@ export default function UpdatePasswordForm() {
 
       await updatePassword(currentPassword, password);
 
-      toast.success("Senha atualizada com sucesso.");
+      toast.success(t(accountText.security.passwordUpdatedSuccess, language));
 
       setPassword("");
       setConfirmPassword("");
@@ -71,12 +83,8 @@ export default function UpdatePasswordForm() {
       setShowPassword(false);
       setShowConfirmPassword(false);
       setShowCurrentPassword(false);
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Não foi possível atualizar a senha.");
-      }
+    } catch {
+      toast.error(t(accountText.security.passwordUpdatedError, language));
     } finally {
       setIsSaving(false);
     }
@@ -90,7 +98,7 @@ export default function UpdatePasswordForm() {
             htmlFor="current-password"
             className="mb-2 block text-sm font-medium text-white/60"
           >
-            Senha atual
+            {t(accountText.security.currentPassword, language)}
           </label>
 
           <div className="relative">
@@ -111,20 +119,21 @@ export default function UpdatePasswordForm() {
               className="absolute inset-y-0 right-3 flex items-center text-white/40 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={
                 showCurrentPassword
-                  ? "Ocultar senha atual"
-                  : "Mostrar senha atual"
+                  ? t(accountText.security.hideCurrentPassword, language)
+                  : t(accountText.security.showCurrentPassword, language)
               }
             >
               {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
         </div>
+
         <div>
           <label
             htmlFor="new-password"
             className="mb-2 block text-sm font-medium text-white/60"
           >
-            Nova senha
+            {t(accountText.security.newPassword, language)}
           </label>
 
           <div className="relative">
@@ -144,7 +153,9 @@ export default function UpdatePasswordForm() {
               disabled={isSaving}
               className="absolute inset-y-0 right-3 flex items-center text-white/40 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={
-                showPassword ? "Ocultar nova senha" : "Mostrar nova senha"
+                showPassword
+                  ? t(accountText.security.hideNewPassword, language)
+                  : t(accountText.security.showNewPassword, language)
               }
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -180,7 +191,7 @@ export default function UpdatePasswordForm() {
             htmlFor="confirm-password"
             className="mb-2 block text-sm font-medium text-white/60"
           >
-            Confirmar senha
+            {t(accountText.security.confirmPassword, language)}
           </label>
 
           <div className="relative">
@@ -201,8 +212,8 @@ export default function UpdatePasswordForm() {
               className="absolute inset-y-0 right-3 flex items-center text-white/40 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={
                 showConfirmPassword
-                  ? "Ocultar confirmação da senha"
-                  : "Mostrar confirmação da senha"
+                  ? t(accountText.security.hidePasswordConfirmation, language)
+                  : t(accountText.security.showPasswordConfirmation, language)
               }
             >
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -218,7 +229,7 @@ export default function UpdatePasswordForm() {
           {isSaving ? (
             <LoaderCircle size={18} className="animate-spin" />
           ) : (
-            "Atualizar senha"
+            t(accountText.security.updatePassword, language)
           )}
         </button>
       </form>

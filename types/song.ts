@@ -1,6 +1,7 @@
 import { TranslatedText } from "@/types/translated-text";
 import { Price } from "@/types/price";
 import { Product } from "@/types/product";
+import type { Lesson } from "@/types/lesson";
 
 export interface Song extends Product {
   slug: string;
@@ -16,5 +17,6 @@ export interface Song extends Product {
   tuning: string;
   capo: string;
 
-  previewVideo?: string;
+  previewVideo: string;
+  lessons: Lesson[];
 }
