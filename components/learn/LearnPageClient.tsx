@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Header from "@/components/layout/Header";
 import Container from "@/components/ui/Container";
 import LibraryCard from "@/components/learn/LibraryCard";
 import Shelf from "@/components/learn/Shelf";
@@ -71,8 +70,6 @@ export default function LearnPageClient({
 
   return (
     <>
-      <Header />
-
       <main className="relative overflow-x-clip pb-32 pt-32">
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           <div

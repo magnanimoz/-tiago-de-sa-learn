@@ -1,4 +1,3 @@
-import Header from "@/components/layout/Header";
 import CourseContent from "./CourseContent";
 
 type CoursePageProps = {
@@ -21,13 +20,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
   const courseName = courseNames[courseSlug] ?? "Curso";
 
   return (
-    <>
-      <Header />
-
-      <main className="relative min-h-screen overflow-x-clip pb-32 pt-32">
-        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div
-            className="
+    <main className="relative min-h-screen overflow-x-clip pb-32 pt-32">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div
+          className="
               absolute
               left-[-10rem]
               top-24
@@ -40,10 +36,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
               scale-90
               animate-[blobFadeIn_1.2s_ease-out_forwards]
             "
-          />
+        />
 
-          <div
-            className="
+        <div
+          className="
               absolute
               right-[-8rem]
               top-[28rem]
@@ -56,11 +52,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
               scale-90
               animate-[blobFadeIn_1.2s_ease-out_250ms_forwards]
             "
-          />
-        </div>
+        />
+      </div>
 
-        <CourseContent courseName={courseName} />
-      </main>
-    </>
+      <CourseContent courseName={courseName} />
+    </main>
   );
 }

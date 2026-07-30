@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import Dropdown from "@/components/ui/Dropdown";
 import UserMenu from "@/components/layout/UserMenu";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { headerText } from "@/lib/i18n/header";
@@ -22,7 +22,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  const { language, routeLocale, setLanguage } = useSettings();
+  const { language, routeLocale } = useSettings();
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
@@ -156,74 +156,7 @@ export default function Header() {
               min-[992px]:flex
             "
           >
-            <Dropdown
-              width="w-52"
-              trigger={
-                <button
-                  type="button"
-                  className="
-                    inline-flex
-                    items-center
-                    gap-1.5
-                    text-sm
-                    font-medium
-                    text-white/55
-                    transition-colors
-                    duration-300
-                    hover:text-white
-                  "
-                >
-                  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-                    <path
-                      d="M12 2C17.52 2 22 6.48 22 12S17.52 22 12 22 2 17.52 2 12 6.48 2 12 2Z"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M2 12H22"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M12 2C14.5 4.8 16 8.3 16 12S14.5 19.2 12 22"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M12 2C9.5 4.8 8 8.3 8 12S9.5 19.2 12 22"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    />
-                  </svg>
-
-                  <span>{language === "pt" ? "PT" : "EN"}</span>
-
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    className="h-3 w-3 opacity-40"
-                  >
-                    <path
-                      d="M6 8L10 12L14 8"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              }
-            >
-              <Dropdown.Item onClick={() => setLanguage("pt")}>
-                <span>🇧🇷 Português</span>
-                {language === "pt" && <span>✓</span>}
-              </Dropdown.Item>
-
-              <Dropdown.Item onClick={() => setLanguage("en")}>
-                <span>🇺🇸 English</span>
-                {language === "en" && <span>✓</span>}
-              </Dropdown.Item>
-            </Dropdown>
+            <LanguageSwitcher />
 
             {isLoading ? (
               <div
@@ -378,6 +311,15 @@ export default function Header() {
             sm:px-8
           "
         >
+          {menuOpen && (
+            <div className="mb-8 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/35">
+                {language === "pt" ? "Idioma" : "Language"}
+              </p>
+
+              <LanguageSwitcher />
+            </div>
+          )}
           {links.map((link, index) => (
             <Link
               key={link.href}

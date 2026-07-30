@@ -40,11 +40,21 @@
 │   │   │   └── page.tsx
 │   │   └── page.tsx
 │   ├── api
+│   │   ├── .DS_Store
 │   │   ├── checkout
 │   │   │   └── route.ts
+│   │   ├── mercadopago
+│   │   │   ├── .DS_Store
+│   │   │   └── webhook
+│   │   │       └── route.ts
 │   │   ├── newsletter
 │   │   │   └── route.ts
+│   │   ├── payments
+│   │   │   └── [paymentId]
+│   │   │       └── route.ts
 │   │   └── stripe
+│   │       ├── checkout
+│   │       │   └── route.ts
 │   │       └── webhook
 │   │           └── route.ts
 │   ├── favicon.ico
@@ -77,9 +87,17 @@
 │   │   ├── LoginHero.tsx
 │   │   └── SocialLoginButton.tsx
 │   ├── checkout
+│   │   ├── CheckoutAtmosphere.tsx
 │   │   ├── CheckoutButton.tsx
+│   │   ├── CheckoutCardForm.tsx
 │   │   ├── CheckoutPaymentForm.tsx
-│   │   └── EmbeddedCheckout.tsx
+│   │   ├── CheckoutPaymentHeader.tsx
+│   │   ├── CheckoutPaymentMethodSelector.tsx
+│   │   ├── CheckoutPaymentState.tsx
+│   │   ├── CheckoutPixForm.tsx
+│   │   ├── CheckoutPreviewControls.tsx
+│   │   ├── CheckoutReturnExperience.tsx
+│   │   └── CheckoutStripeButton.tsx
 │   ├── home
 │   │   └── Hero.tsx
 │   ├── layout
@@ -105,9 +123,18 @@
 │   └── SettingsContext.tsx
 ├── eslint.config.mjs
 ├── estrutura.txt
+├── hooks
+│   └── checkout
+│       ├── useCheckoutCard.ts
+│       ├── useCheckoutPix.ts
+│       ├── useCheckoutPreview.ts
+│       └── useCheckoutState.ts
 ├── lib
 │   ├── access
 │   │   └── user-has-access-to-content.ts
+│   ├── checkout
+│   │   ├── get-checkout-config.ts
+│   │   └── payment-status.ts
 │   ├── courses.ts
 │   ├── dictionary.ts
 │   ├── format-price.ts
@@ -125,10 +152,12 @@
 │   │   └── library-items.ts
 │   ├── lessons.ts
 │   ├── locale-path.ts
+│   ├── mercadopago
+│   │   └── client.ts
 │   ├── packs.ts
 │   ├── songs.ts
 │   ├── stripe
-│   │   └── server.ts
+│   │   └── client.ts
 │   ├── supabase
 │   │   ├── admin.ts
 │   │   ├── client.ts
@@ -198,9 +227,11 @@
 │   └── window.svg
 ├── tsconfig.json
 └── types
+    ├── checkout-payment.ts
     ├── course.ts
     ├── lesson.ts
     ├── library-item.ts
+    ├── mercadopago.d.ts
     ├── pack-item.ts
     ├── pack.ts
     ├── packs.ts
@@ -209,4 +240,4 @@
     ├── song.ts
     └── translated-text.ts
 
-45 directories, 165 files
+54 directories, 187 files

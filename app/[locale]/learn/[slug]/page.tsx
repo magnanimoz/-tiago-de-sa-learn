@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import Header from "@/components/layout/Header";
 import Container from "@/components/ui/Container";
 import LessonExperience from "@/components/learn/LessonExperience";
 import { createClient } from "@/lib/supabase/server";
@@ -187,8 +186,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   return (
     <>
-      <Header />
-
       <main className="relative overflow-x-clip pb-32 pt-32">
         {hasAccess ? (
           <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#0d0d0f]">
