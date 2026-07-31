@@ -49,7 +49,7 @@ export default function CheckoutPaymentForm({
     resetCheckoutState,
   } = useCheckoutState();
 
-  const { cardReady, isSubmitting, resetCard } = useCheckoutCard({
+  const { cardReady, cardBrand, isSubmitting, resetCard } = useCheckoutCard({
     enabled:
       isMercadoPagoCheckout &&
       paymentMethod === "card" &&
@@ -179,6 +179,7 @@ export default function CheckoutPaymentForm({
                       <CheckoutCardForm
                         language={language}
                         cardReady={cardReady}
+                        cardBrand={cardBrand}
                         isSubmitting={isSubmitting}
                       />
                     )}

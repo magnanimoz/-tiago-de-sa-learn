@@ -2,6 +2,8 @@ import { TranslatedText } from "@/types/translated-text";
 import { Price } from "@/types/price";
 import { Product } from "@/types/product";
 import type { Lesson } from "@/types/lesson";
+import type { Tuning } from "@/types/tuning";
+import type { Difficulty } from "./difficulty";
 
 export interface Song extends Product {
   slug: string;
@@ -11,10 +13,10 @@ export interface Song extends Product {
 
   price: Price;
 
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  difficulty: Difficulty;
   duration: string;
   key: string;
-  tuning: string;
+  tuning: Tuning;
   capo: string;
 
   previewVideo: string;

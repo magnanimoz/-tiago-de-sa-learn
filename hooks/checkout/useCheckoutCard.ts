@@ -34,6 +34,7 @@ export function useCheckoutCard({
 }: UseCheckoutCardProps) {
   const [cardReady, setCardReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cardBrand, setCardBrand] = useState<string | null>(null);
 
   const cardFormRef = useRef<MercadoPagoCardForm | null>(null);
   const isSubmittingRef = useRef(false);
@@ -45,6 +46,7 @@ export function useCheckoutCard({
 
     setCardReady(false);
     setIsSubmitting(false);
+    setCardBrand(null);
   }
 
   useEffect(() => {
@@ -114,20 +116,36 @@ export function useCheckoutCard({
             cardNumber: {
               id: "form-checkout__cardNumber",
               placeholder:
-                language === "pt" ? "Número do cartão" : "Card number",
+                language === "pt"
+                  ? "1234 5678 9012 3456"
+                  : "1234 5678 9012 3456",
+              style: {
+                color: "#ffffff",
+                fontSize: "15px",
+                fontFamily: "'Space Grotesk', sans-serif",
+              },
             },
             expirationDate: {
               id: "form-checkout__expirationDate",
               placeholder: "MM/AA",
+              style: {
+                color: "#ffffff",
+                fontSize: "15px",
+                fontFamily: "'Space Grotesk', sans-serif",
+              },
             },
             securityCode: {
               id: "form-checkout__securityCode",
-              placeholder: "CVV",
+              placeholder: "123",
+              style: {
+                color: "#ffffff",
+                fontSize: "15px",
+                fontFamily: "'Space Grotesk', sans-serif",
+              },
             },
             cardholderName: {
               id: "form-checkout__cardholderName",
-              placeholder:
-                language === "pt" ? "Nome no cartão" : "Name on card",
+              placeholder: language === "pt" ? "João Silva" : "Joe Shmoe",
             },
             issuer: {
               id: "form-checkout__issuer",
@@ -151,6 +169,23 @@ export function useCheckoutCard({
             },
           },
           callbacks: {
+            onBinChange: async (bin: string) => {
+              if (bin.length < 6) {
+                setCardBrand(null);
+                return;
+              }
+
+              try {
+                const response = await (mp as any).getPaymentMethods({ bin });
+                const paymentMethod = response.results?.[0];
+
+                setCardBrand(paymentMethod?.id ?? null);
+              } catch (error) {
+                console.error("Erro ao identificar bandeira:", error);
+                setCardBrand(null);
+              }
+            },
+
             onFormMounted(error: unknown) {
               if (error) {
                 console.error("Erro ao montar CardForm:", error);
@@ -281,7 +316,7 @@ export function useCheckoutCard({
               };
             },
           },
-        });
+        } as any);
 
         cardFormRef.current = cardForm;
       } catch (error) {
@@ -320,6 +355,7 @@ export function useCheckoutCard({
 
   return {
     cardReady,
+    cardBrand,
     isSubmitting,
     resetCard,
   };

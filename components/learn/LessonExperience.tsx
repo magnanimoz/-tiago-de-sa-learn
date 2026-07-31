@@ -1,14 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { CheckCircle2, Lock, Play } from "lucide-react";
+import {
+  ArrowLeft,
+  BarChart3,
+  CheckCircle2,
+  CircleDot,
+  Clock3,
+  Guitar,
+  Infinity,
+  Lock,
+  Music2,
+  Play,
+} from "lucide-react";
 import { motion } from "framer-motion";
+import { getTuningLabel } from "@/lib/get-tuning-label";
+import Link from "next/link";
 
 import type { Locale } from "@/lib/i18n";
 import { learnText } from "@/lib/i18n/learn";
+import { lessonText } from "@/lib/i18n/lesson";
 import { localePath } from "@/lib/locale-path";
 import type { Song } from "@/types/song";
 import { t } from "@/lib/t";
@@ -44,6 +58,104 @@ export default function LessonExperience({
     lesson.lessons[0]?.id ?? "",
   );
 
+  const backButtonRef = useRef<HTMLDivElement>(null);
+  const salesLayoutRef = useRef<HTMLDivElement>(null);
+  const leftColumnRef = useRef<HTMLDivElement>(null);
+  const rightColumnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const backButton = backButtonRef.current!;
+    const layout = salesLayoutRef.current!;
+    const leftColumn = leftColumnRef.current!;
+    const rightColumn = rightColumnRef.current!;
+
+    if (!backButton || !layout || !leftColumn || !rightColumn) {
+      return;
+    }
+
+    let animationFrameId: number | null = null;
+    let maximumOffset = 0;
+
+    const leftColumnSpeed = 0.35;
+    const compensationRate = 1 - leftColumnSpeed;
+
+    function measureColumns() {
+      const leftHeight = leftColumn.scrollHeight;
+      const rightHeight = rightColumn.scrollHeight;
+
+      // Pequena correção visual para compensar bordas, margens e diferenças
+      // perceptuais entre as duas colunas. Sem isso, elas parecem "grudar"
+      // alguns pixels antes do esperado.
+      const visualCorrection = -6.5;
+
+      maximumOffset = Math.max(rightHeight - leftHeight + visualCorrection, 0);
+    }
+
+    function updateParallax() {
+      animationFrameId = null;
+
+      if (window.innerWidth < 1024) {
+        backButton.style.transform = "";
+        leftColumn.style.transform = "";
+        return;
+      }
+
+      const compensation = Math.min(
+        window.scrollY * compensationRate,
+        maximumOffset,
+      );
+
+      const transform = `translate3d(0, ${compensation}px, 0)`;
+
+      backButton.style.transform = transform;
+      leftColumn.style.transform = transform;
+    }
+
+    function requestParallaxUpdate() {
+      if (animationFrameId !== null) {
+        return;
+      }
+
+      animationFrameId = window.requestAnimationFrame(updateParallax);
+    }
+
+    function handleResize() {
+      measureColumns();
+      requestParallaxUpdate();
+    }
+
+    measureColumns();
+    requestParallaxUpdate();
+
+    const resizeObserver = new ResizeObserver(() => {
+      measureColumns();
+      requestParallaxUpdate();
+    });
+
+    resizeObserver.observe(leftColumn);
+    resizeObserver.observe(rightColumn);
+
+    window.addEventListener("scroll", requestParallaxUpdate, {
+      passive: true,
+    });
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      resizeObserver.disconnect();
+
+      window.removeEventListener("scroll", requestParallaxUpdate);
+      window.removeEventListener("resize", handleResize);
+
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+
+      backButton.style.transform = "";
+      leftColumn.style.transform = "";
+    };
+  }, [lesson.lessons.length]);
+
   const locale = language === "pt" ? "pt-BR" : "en-US";
   const currency = language === "pt" ? "BRL" : "USD";
   const amount = language === "pt" ? lesson.price.brl : lesson.price.usd;
@@ -52,6 +164,13 @@ export default function LessonExperience({
     style: "currency",
     currency,
   }).format(amount);
+
+  const difficultyLabel =
+    lesson.difficulty === "Beginner"
+      ? t(lessonText.beginner, language)
+      : lesson.difficulty === "Intermediate"
+        ? t(lessonText.intermediate, language)
+        : t(lessonText.advanced, language);
 
   const selectedLesson =
     lesson.lessons.find((item) => item.id === selectedLessonId) ??
@@ -65,55 +184,101 @@ export default function LessonExperience({
 
   return (
     <section className="relative mx-auto w-full max-w-6xl">
-      {!hasAccess && (
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 2.2,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]"
+      <motion.div
+        ref={backButtonRef}
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.8,
+          delay: 0.05,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+        className="mb-8 will-change-transform"
+      >
+        <Link
+          href={localePath("/learn", routeLocale)}
+          className="group inline-flex items-center gap-2 text-sm text-white/40 transition hover:text-white/75"
         >
-          <div className="grid lg:grid-cols-[340px_minmax(0,1fr)]">
-            <div className="flex flex-col justify-between p-6 sm:p-7">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Play className="h-4 w-4 text-magenta" />
+          <ArrowLeft
+            className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1"
+            strokeWidth={1.8}
+          />
 
-                  <p className="text-sm font-medium text-white/45">
-                    {language === "pt" ? "Prévia da aula" : "Lesson preview"}
-                  </p>
+          <span>
+            {language === "pt" ? "Voltar para a biblioteca" : "Back to library"}
+          </span>
+        </Link>
+      </motion.div>
+      {!hasAccess ? (
+        <div
+          ref={salesLayoutRef}
+          className="grid items-start gap-5 lg:grid-cols-[320px_minmax(0,1fr)]"
+        >
+          <div ref={leftColumnRef} className="self-start will-change-transform">
+            <motion.aside
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.8,
+                delay: 0.05,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]"
+            >
+              <div className="flex min-h-[540px] flex-col justify-between p-6 sm:p-7">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Play className="h-4 w-4 text-magenta" />
+
+                    <p className="text-sm font-medium text-white/45">
+                      {language === "pt" ? "Prévia da aula" : "Lesson preview"}
+                    </p>
+                  </div>
+
+                  <h1 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+                    {t(lesson.title, language)}
+                  </h1>
+
+                  <p className="mt-1 text-sm text-white/45">{lesson.artist}</p>
+
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-center gap-2.5 text-[13px] font-light text-white/45">
+                      <Clock3 className="h-4 w-4 shrink-0 text-white/30" />
+                      <span>{lesson.duration}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 text-[13px] font-light text-white/45">
+                      <Music2 className="h-4 w-4 shrink-0 text-white/30" />
+                      <span>
+                        {t(lessonText.key, language)} {lesson.key}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 text-[13px] font-light text-white/45">
+                      <Guitar className="h-4 w-4 shrink-0 text-white/30" />
+                      <span>{getTuningLabel(lesson.tuning, language)}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 text-[13px] font-light text-white/45">
+                      <BarChart3 className="h-4 w-4 shrink-0 text-white/30" />
+                      <span>{difficultyLabel}</span>
+                    </div>
+
+                    {lesson.capo !== "No capo" && (
+                      <div className="flex items-center gap-2.5 text-[13px] font-light text-white/45">
+                        <CircleDot className="h-4 w-4 shrink-0 text-white/30" />
+                        <span>{lesson.capo}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2.5 text-[13px] font-light text-white/45">
+                      <Infinity className="h-4 w-4 shrink-0 text-white/30" />
+                      <span>{t(lessonText.lifetimeAccess, language)}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <h1 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
-                  {t(lesson.title, language)}
-                </h1>
-
-                <p className="text-sm text-white/45">{lesson.artist}</p>
-
-                <div className="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-xs text-white/35">
-                  <span>{lesson.duration}</span>
-                  <span className="text-white/15">•</span>
-                  <span>Key {lesson.key}</span>
-                  <span className="text-white/15">•</span>
-                  <span>{lesson.tuning}</span>
-
-                  {lesson.capo !== "No capo" && (
-                    <>
-                      <span className="text-white/15">•</span>
-                      <span>{lesson.capo}</span>
-                    </>
-                  )}
-                </div>
-
-                <p className="mt-5 text-sm leading-6 text-white/50">
-                  {t(lesson.description, language)}
-                </p>
-              </div>
-
-              {!hasAccess && (
-                <div className="mt-8 border-t border-white/10 pt-5">
+                <div className="mt-10 border-t border-white/10 pt-5">
                   <p className="text-xs text-white/30">
                     {language === "pt" ? "Aula completa" : "Full lesson"}
                   </p>
@@ -138,19 +303,83 @@ export default function LessonExperience({
                     {language === "pt" ? "Desbloquear aula" : "Unlock lesson"}
                   </button>
                 </div>
-              )}
-            </div>
-
-            <div className="border-t border-white/10 bg-black lg:border-l lg:border-t-0">
+              </div>
+            </motion.aside>
+          </div>
+          <div ref={rightColumnRef} className="min-w-0">
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.85,
+                delay: 0.16,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="overflow-hidden rounded-2xl border border-white/10 bg-black"
+            >
               <LessonPreviewPlayer
                 previewUrl={lesson.previewVideo}
                 language={language}
               />
-            </div>
+            </motion.div>
+
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 24,
+                filter: "blur(4px)",
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+              }}
+              transition={{
+                duration: 0.9,
+                delay: 0.28,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="mt-8 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.018]"
+            >
+              <div className="flex items-center justify-between px-5 py-4 sm:px-6">
+                <p className="text-xs font-medium uppercase tracking-[0.08em] text-white/30">
+                  {language === "pt" ? "Conteúdo" : "Content"}
+                </p>
+
+                <span className="text-xs text-white/20">
+                  {lesson.lessons.length}{" "}
+                  {language === "pt"
+                    ? lesson.lessons.length === 1
+                      ? "Aula"
+                      : "Aulas"
+                    : lesson.lessons.length === 1
+                      ? "Lesson"
+                      : "Lessons"}
+                </span>
+              </div>
+
+              <div className="border-t border-white/[0.07]">
+                {lesson.lessons.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 border-b border-white/[0.06] px-5 py-3.5 last:border-b-0 sm:px-6"
+                  >
+                    <span className="w-7 shrink-0 font-mono text-[11px] text-white/20">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <span className="min-w-0 flex-1 text-sm font-light text-white/50">
+                      {t(item.title, language)}
+                    </span>
+
+                    <Lock className="h-3.5 w-3.5 shrink-0 text-white/15" />
+                  </div>
+                ))}
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
-      )}
-      {hasAccess ? (
+        </div>
+      ) : (
         <div className="mt-5 grid items-start gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
           <aside className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
             <div className="p-5">
@@ -258,44 +487,6 @@ export default function LessonExperience({
             </div>
           </div>
         </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: 0.65,
-            duration: 1.2,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]"
-        >
-          <div className="px-5 py-4 sm:px-6">
-            <p className="text-xs font-medium uppercase tracking-[0.08em] text-white/30">
-              {language === "pt" ? "Conteúdo da aula" : "Lesson content"}
-            </p>
-          </div>
-
-          <div className="border-t border-white/10">
-            {lesson.lessons.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                disabled
-                className="flex w-full cursor-default items-center gap-4 border-b border-white/[0.07] px-5 py-4 text-left last:border-b-0 sm:px-6"
-              >
-                <span className="w-8 shrink-0 font-mono text-xs text-white/25">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-
-                <span className="min-w-0 flex-1 text-sm font-medium text-white/60">
-                  {t(item.title, language)}
-                </span>
-
-                <Lock className="h-4 w-4 shrink-0 text-white/25" />
-              </button>
-            ))}
-          </div>
-        </motion.div>
       )}
     </section>
   );

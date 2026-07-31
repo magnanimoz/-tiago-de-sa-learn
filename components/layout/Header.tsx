@@ -20,34 +20,9 @@ const links = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
 
   const { language, routeLocale } = useSettings();
   const { isAuthenticated, isLoading } = useAuth();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const start = 8;
-      const end = 120;
-
-      const progress = Math.min(
-        Math.max((window.scrollY - start) / (end - start), 0),
-        1,
-      );
-
-      setScrollProgress(progress);
-    };
-
-    handleScroll();
-
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -76,14 +51,10 @@ export default function Header() {
             inset-0
             border-b
             border-white/10
-            bg-black/80
+            bg-black/60
             backdrop-blur-md
           "
-          style={{
-            opacity: scrollProgress,
-          }}
         />
-
         <div
           className="
             relative

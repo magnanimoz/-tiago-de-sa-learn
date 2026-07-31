@@ -6,7 +6,6 @@ import CheckoutLayout from "@/components/checkout/CheckoutLayout";
 import CheckoutPaymentForm from "@/components/checkout/CheckoutPaymentForm";
 import CheckoutProductSummary from "@/components/checkout/CheckoutProductSummary";
 import Container from "@/components/ui/Container";
-import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import { userHasAccessToContent } from "@/lib/access/user-has-access-to-content";
 import {
   isRouteLocale,
@@ -107,27 +106,15 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
         : localePath(`/packs/${product.slug}`, routeLocale);
 
   return (
-    <main className="relative min-h-screen overflow-x-clip pb-20 pt-16 sm:pb-24 sm:pt-20">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div
-          className="absolute left-[-14rem] top-0 h-[32rem] w-[32rem]"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(230, 0, 126, 0.14) 0%, rgba(230, 0, 126, 0.05) 38%, transparent 72%)",
-          }}
-        />
+    <main className="relative min-h-screen overflow-x-clip px-0 pb-8 pt-8 sm:pb-10 sm:pt-10">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden animate-checkout-darken">
+        <div className="checkout-blob checkout-blob-pink absolute left-[-14rem] top-0 h-[32rem] w-[32rem]" />
 
-        <div
-          className="absolute right-[-12rem] top-[22rem] h-[30rem] w-[30rem]"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.04) 38%, transparent 72%)",
-          }}
-        />
+        <div className="checkout-blob checkout-blob-blue absolute right-[-12rem] top-[22rem] h-[30rem] w-[30rem]" />
       </div>
 
       <Container>
-        <section className="mx-auto mt-6 w-full max-w-5xl">
+        <section className="mx-auto w-full max-w-5xl">
           <CheckoutLayout
             header={
               <div>
@@ -147,8 +134,6 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
                         : "Back to product"}
                     </span>
                   </Link>
-
-                  <LanguageSwitcher />
                 </div>
 
                 <p className="text-xs font-medium uppercase tracking-[0.14em] text-magenta">
@@ -178,7 +163,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
               />
             }
             paymentPanel={
-              <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#111214] shadow-2xl shadow-black/30">
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
                 <div className="px-3 py-4 sm:px-5 sm:py-6">
                   <CheckoutPaymentForm
                     slug={product.slug}

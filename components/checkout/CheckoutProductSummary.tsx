@@ -15,7 +15,15 @@ export default function CheckoutProductSummary({
 }: CheckoutProductSummaryProps) {
   return (
     <aside>
-      <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.018]">
+      <div
+        className="
+          overflow-hidden
+          rounded-2xl
+          border
+          border-white/10
+          bg-white/[0.025]
+        "
+      >
         {image && (
           <div className="relative aspect-[16/10] overflow-hidden bg-black">
             <img
@@ -33,11 +41,11 @@ export default function CheckoutProductSummary({
             {language === "pt" ? "Sua compra" : "Your purchase"}
           </p>
 
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-white">
+          <h2 className="mt-5 text-xl font-semibold tracking-[-0.02em] text-white">
             {productTitle}
           </h2>
 
-          {artist && <p className="mt-1 text-sm text-white/45">{artist}</p>}
+          {artist && <p className="text-sm text-white/45">{artist}</p>}
 
           <div className="mt-5 border-t border-white/10 pt-5">
             <div className="flex items-end justify-between gap-4">

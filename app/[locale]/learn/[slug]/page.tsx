@@ -186,7 +186,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   return (
     <>
-      <main className="relative overflow-x-clip pb-32 pt-32">
+      <main className="relative overflow-x-clip pb-32 pt-29">
         {hasAccess ? (
           <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#0d0d0f]">
             <div

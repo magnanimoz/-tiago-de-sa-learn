@@ -1,20 +1,38 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { CreditCard } from "lucide-react";
 
 import type { CheckoutLanguage } from "@/types/checkout-payment";
 
 type CheckoutCardFormProps = {
   language: CheckoutLanguage;
   cardReady: boolean;
+  cardBrand: string | null;
   isSubmitting: boolean;
 };
 
 const checkoutEase = [0.22, 1, 0.36, 1] as const;
 
+const cardBrandLogos: Record<string, string> = {
+  visa: "/images/payment/visa.svg",
+  master: "/images/payment/mastercard.svg",
+  mastercard: "/images/payment/mastercard.svg",
+  amex: "/images/payment/amex.svg",
+  elo: "/images/payment/elo.svg",
+  hipercard: "/images/payment/hipercard.svg",
+  maestro: "/images/payment/maestro.svg",
+  discover: "/images/payment/discover.svg",
+  jcb: "/images/payment/jcb.svg",
+  diners: "/images/payment/dinersclub.svg",
+  dinersclub: "/images/payment/dinersclub.svg",
+  unionpay: "/images/payment/unionpay.svg",
+};
+
 export default function CheckoutCardForm({
   language,
   cardReady,
+  cardBrand,
   isSubmitting,
 }: CheckoutCardFormProps) {
   return (
@@ -62,7 +80,7 @@ export default function CheckoutCardForm({
       }}
       className="overflow-hidden"
     >
-      <div className="relative mt-6 min-h-[430px] overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-3 sm:p-5">
+      <div className="relative mt-6 min-h-[430px] overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:p-5">
         <AnimatePresence>
           {!cardReady && (
             <motion.div
@@ -127,22 +145,53 @@ export default function CheckoutCardForm({
             <div>
               <label
                 htmlFor="form-checkout__cardNumber"
-                className="mb-2 block text-xs font-medium text-white/55"
+                className="mb-2 block text-sm font-medium text-white/55"
               >
                 {language === "pt" ? "Número do cartão" : "Card number"}
               </label>
 
-              <div
-                id="form-checkout__cardNumber"
-                className="h-12 rounded-xl border border-white/10 bg-white/[0.035] px-4 transition focus-within:border-emerald-500/70 focus-within:bg-white/[0.055] focus-within:ring-4 focus-within:ring-emerald-500/10"
-              />
+              <div className="relative">
+                <div
+                  id="form-checkout__cardNumber"
+                  className="h-12 rounded-xl border border-white/10 bg-white/[0.05] px-4 pr-16 transition focus-within:border-white/25 focus-within:bg-white/[0.07] focus-within:ring-4 focus-within:ring-white/[0.06]"
+                />
+
+                <AnimatePresence mode="wait" initial={false}>
+                  {cardBrand && cardBrandLogos[cardBrand] ? (
+                    <motion.img
+                      key={cardBrand}
+                      src={cardBrandLogos[cardBrand]}
+                      alt={cardBrand}
+                      initial={{ opacity: 0, scale: 0.9, y: 2 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -2 }}
+                      transition={{
+                        duration: 0.2,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      className="pointer-events-none absolute right-4 top-1/2 h-6 w-auto -translate-y-1/2 object-contain"
+                    />
+                  ) : (
+                    <motion.div
+                      key="generic-card"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.18 }}
+                      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/25"
+                    >
+                      <CreditCard className="h-7 w-7" strokeWidth={1.6} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label
                   htmlFor="form-checkout__expirationDate"
-                  className="mb-2 block text-xs font-medium text-white/55"
+                  className="mb-2 block text-sm font-medium text-white/55"
                 >
                   {language === "pt" ? "Validade" : "Expiration"}
                 </label>
@@ -171,7 +220,7 @@ export default function CheckoutCardForm({
             <div>
               <label
                 htmlFor="form-checkout__cardholderName"
-                className="mb-2 block text-xs font-medium text-white/55"
+                className="mb-2 block text-sm font-medium text-white/55"
               >
                 {language === "pt" ? "Nome no cartão" : "Name on card"}
               </label>
@@ -187,7 +236,7 @@ export default function CheckoutCardForm({
               <div>
                 <label
                   htmlFor="form-checkout__issuer"
-                  className="mb-2 block text-xs font-medium text-white/55"
+                  className="mb-2 block text-sm font-medium text-white/55"
                 >
                   {language === "pt" ? "Banco emissor" : "Issuing bank"}
                 </label>
@@ -201,7 +250,7 @@ export default function CheckoutCardForm({
               <div>
                 <label
                   htmlFor="form-checkout__installments"
-                  className="mb-2 block text-xs font-medium text-white/55"
+                  className="mb-2 block text-sm font-medium text-white/55"
                 >
                   {language === "pt" ? "Parcelas" : "Installments"}
                 </label>
@@ -217,7 +266,7 @@ export default function CheckoutCardForm({
               <div>
                 <label
                   htmlFor="form-checkout__identificationType"
-                  className="mb-2 block text-xs font-medium text-white/55"
+                  className="mb-2 block text-sm font-medium text-white/55"
                 >
                   {language === "pt" ? "Documento" : "Document"}
                 </label>
@@ -231,7 +280,7 @@ export default function CheckoutCardForm({
               <div>
                 <label
                   htmlFor="form-checkout__identificationNumber"
-                  className="mb-2 block text-xs font-medium text-white/55"
+                  className="mb-2 block text-sm font-medium text-white/55"
                 >
                   {language === "pt"
                     ? "Número do documento"
@@ -249,7 +298,7 @@ export default function CheckoutCardForm({
             <div>
               <label
                 htmlFor="form-checkout__cardholderEmail"
-                className="mb-2 block text-xs font-medium text-white/55"
+                className="mb-2 block text-sm font-medium text-white/55"
               >
                 E-mail
               </label>

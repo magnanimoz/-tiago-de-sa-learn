@@ -1,14 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 
 type CheckoutLayoutProps = {
   header: ReactNode;
@@ -21,71 +14,55 @@ export default function CheckoutLayout({
   productSummary,
   paymentPanel,
 }: CheckoutLayoutProps) {
-  const previousScrollYRef = useRef(0);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-
   const { scrollY } = useScroll();
 
-  const productOffset = useTransform(scrollY, [0, 900], [0, 120]);
+  const productOffset = useTransform(scrollY, [0, 240], [0, 18]);
 
   const smoothProductOffset = useSpring(productOffset, {
-    stiffness: 110,
-    damping: 28,
-    mass: 0.7,
+    stiffness: 140,
+    damping: 30,
+    mass: 0.5,
   });
-
-  useMotionValueEvent(scrollY, "change", (currentScrollY) => {
-    const previousScrollY = previousScrollYRef.current;
-    const difference = currentScrollY - previousScrollY;
-
-    if (currentScrollY < 80) {
-      setIsHeaderVisible(true);
-      previousScrollYRef.current = currentScrollY;
-      return;
-    }
-
-    if (Math.abs(difference) < 4) {
-      return;
-    }
-
-    setIsHeaderVisible(difference < 0);
-    previousScrollYRef.current = currentScrollY;
-  });
-
-  useEffect(() => {
-    previousScrollYRef.current = window.scrollY;
-  }, []);
 
   return (
     <div>
       <motion.div
-        initial={false}
-        animate={
-          isHeaderVisible
-            ? {
-                opacity: 1,
-                y: 0,
-                filter: "blur(0px)",
-              }
-            : {
-                opacity: 0,
-                y: -18,
-                filter: "blur(5px)",
-              }
-        }
+        initial={{
+          opacity: 0,
+          y: 16,
+          filter: "blur(4px)",
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+        }}
         transition={{
-          duration: 0.35,
+          duration: 0.8,
           ease: [0.22, 1, 0.36, 1],
         }}
-        className={["mb-8", isHeaderVisible ? "" : "pointer-events-none"].join(
-          " ",
-        )}
+        className="mb-8"
       >
         {header}
       </motion.div>
 
       <div className="grid items-start gap-8 lg:grid-cols-[360px_minmax(0,1fr)]">
         <motion.div
+          initial={{
+            opacity: 0,
+            y: 22,
+            filter: "blur(4px)",
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+          }}
+          transition={{
+            duration: 1.8,
+            delay: 0.2,
+            ease: [0.18, 0.9, 0.2, 1],
+          }}
           style={{
             y: smoothProductOffset,
           }}
@@ -94,7 +71,25 @@ export default function CheckoutLayout({
           {productSummary}
         </motion.div>
 
-        <div>{paymentPanel}</div>
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 26,
+            filter: "blur(6px)",
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+          }}
+          transition={{
+            duration: 2.3,
+            delay: 0.4,
+            ease: [0.18, 0.9, 0.2, 1],
+          }}
+        >
+          {paymentPanel}
+        </motion.div>
       </div>
     </div>
   );
