@@ -5,6 +5,7 @@ import LessonExperience from "@/components/learn/LessonExperience";
 import { createClient } from "@/lib/supabase/server";
 import { userHasAccessToContent } from "@/lib/access/user-has-access-to-content";
 import { isRouteLocale, routeLocaleToLanguage } from "@/lib/i18n";
+import LessonAccessBackground from "@/components/learn/LessonAccessBackground";
 
 type LessonPageProps = {
   params: Promise<{
@@ -188,39 +189,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
     <>
       <main className="relative overflow-x-clip pb-32 pt-29">
         {hasAccess ? (
-          <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#0d0d0f]">
-            <div
-              className="
-                  absolute
-                  inset-0
-                  opacity-0
-                  animate-lesson-darken
-                "
-              style={{
-                background:
-                  "linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.6))",
-              }}
-            />
-
-            <div
-              className="
-                  absolute
-                  left-[59%]
-                  top-[-3rem]
-                  h-[52rem]
-                  w-[62rem]
-                  -translate-x-1/2
-                  opacity-0
-                  animate-lesson-amber
-                "
-              style={{
-                background:
-                  "radial-gradient(ellipse, rgba(196, 113, 49, 0.5) 0%, rgba(132, 70, 30, 0.2) 34%, rgba(80, 40, 20, 0.1) 56%, transparent 74%)",
-              }}
-            />
-          </div>
+          <LessonAccessBackground />
         ) : (
-          <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
             <div
               className="
                 absolute
@@ -228,8 +199,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 top-0
                 h-[32rem]
                 w-[32rem]
-                opacity-0
                 scale-90
+                opacity-0
                 animate-[blobFadeIn_1.2s_ease-out_forwards]
               "
               style={{
@@ -245,8 +216,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 top-[24rem]
                 h-[30rem]
                 w-[30rem]
-                opacity-0
                 scale-90
+                opacity-0
                 animate-[blobFadeIn_1.2s_ease-out_250ms_forwards]
               "
               style={{
@@ -256,7 +227,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
             />
           </div>
         )}
-
         <Container>
           <LessonExperience
             lesson={lesson}

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #101012;
+  --color-background: #000000;
   --color-surface: #1a1a1f;
   --color-foreground: #f5f5f5;
   --color-muted: #a8a8b3;
@@ -121,26 +121,16 @@ select:-webkit-autofill {
 }
 
 @keyframes lessonAmberReveal {
-  0% {
+  from {
     opacity: 0;
-    transform: translate3d(80px, 50px, 0) scale(0.72);
-    filter: blur(120px);
+    transform: translate3d(30px, 18px, 0) scale(0.9);
+    filter: blur(100px);
   }
 
-  35% {
-    opacity: 0.25;
-  }
-
-  65% {
-    opacity: 0.72;
-    transform: translate3d(20px, 10px, 0) scale(0.96);
-    filter: blur(85px);
-  }
-
-  100% {
+  to {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1.08);
-    filter: blur(70px);
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(64px);
   }
 }
 
@@ -155,11 +145,12 @@ select:-webkit-autofill {
 }
 
 @utility animate-lesson-amber {
-  animation: lessonAmberReveal 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: lessonAmberReveal 2.4s ease-in-out 120ms forwards;
+  will-change: opacity, transform, filter;
 }
 
 @utility animate-lesson-darken {
-  animation: lessonDarken 2s ease-out forwards;
+  animation: lessonDarken 2.4s cubic-bezier(0.16, 1, 0.3, 1) 120ms forwards;
 }
 
 @keyframes checkoutBackground {

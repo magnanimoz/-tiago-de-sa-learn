@@ -20,6 +20,7 @@ const links = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(false);
 
   const { language, routeLocale } = useSettings();
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,6 +33,22 @@ export default function Header() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setHeaderVisible(window.scrollY > 0);
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <>
       <header
@@ -41,7 +58,32 @@ export default function Header() {
           top-0
           z-50
           h-20
+          border-b
+          transition-[background-color,border-color,backdrop-filter]
+          duration-[400ms]
+          ease-[cubic-bezier(0,0,1,1)]
+          backdrop-blur-[24px]
+          backdrop-saturate-125
+          [-webkit-backdrop-filter:blur(24px)_saturate(1.25)]
         "
+        style={{
+          transition:
+            "background-color 400ms cubic-bezier(0,0,1,1), border-color 400ms cubic-bezier(0,0,1,1), backdrop-filter 400ms cubic-bezier(0,0,1,1), -webkit-backdrop-filter 400ms cubic-bezier(0,0,1,1)",
+
+          backgroundColor: headerVisible ? "rgba(0,0,0,0.8)" : "rgba(0,0,0,0)",
+
+          borderColor: headerVisible
+            ? "rgba(255,255,255,0.1)"
+            : "rgba(255,255,255,0)",
+
+          backdropFilter: headerVisible
+            ? "blur(24px) saturate(1.25)"
+            : "blur(0px) saturate(1)",
+
+          WebkitBackdropFilter: headerVisible
+            ? "blur(24px) saturate(1.25)"
+            : "blur(0px) saturate(1)",
+        }}
       >
         <div
           aria-hidden="true"
@@ -49,12 +91,31 @@ export default function Header() {
             pointer-events-none
             absolute
             inset-0
-            border-b
-            border-white/10
-            bg-black/60
-            backdrop-blur-md
+            overflow-hidden
           "
-        />
+        >
+          <div
+            className="
+              absolute
+              inset-0
+              bg-repeat
+              opacity-[0.025]
+            "
+            style={{
+              backgroundImage: "url('/textures/noise.svg')",
+              backgroundSize: "220px",
+            }}
+          />
+
+          <div
+            className="
+              absolute
+              inset-0
+              shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]
+            "
+          />
+        </div>
+
         <div
           className="
             relative

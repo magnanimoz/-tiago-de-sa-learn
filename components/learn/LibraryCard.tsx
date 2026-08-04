@@ -28,14 +28,11 @@ export default function LibraryCard({
   acquired = false,
 }: LibraryCardProps) {
   const { routeLocale } = useSettings();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isLoading } = useAuth();
 
   const localizedHref = localePath(href, routeLocale);
-  const loginPath = localePath("/login", routeLocale);
 
-  const destination = isAuthenticated
-    ? localizedHref
-    : `${loginPath}?redirect=${encodeURIComponent(localizedHref)}`;
+  const destination = localizedHref;
 
   return (
     <Link

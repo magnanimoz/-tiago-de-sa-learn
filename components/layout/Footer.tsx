@@ -146,15 +146,40 @@ export default function Footer() {
   return (
     <footer
       className="
-        relative
-        z-10
-        overflow-hidden
-        border-t
-        border-white/10
-        bg-black/60
-        backdrop-blur-md
-      "
+    relative
+    z-10
+    overflow-hidden
+    border-t
+    border-white/10
+    bg-white/[0.03]
+    backdrop-blur-[32px]
+    backdrop-saturate-150
+    [-webkit-backdrop-filter:blur(32px)_saturate(1.5)]
+  "
     >
+      <div
+        aria-hidden="true"
+        className="
+      pointer-events-none
+      absolute
+      inset-0
+      overflow-hidden
+    "
+      >
+        <div
+          className="
+        absolute
+        inset-0
+        bg-repeat
+        opacity-[0.025]
+      "
+          style={{
+            backgroundImage: "url('/textures/noise.svg')",
+            backgroundSize: "220px",
+          }}
+        />
+      </div>
+
       <div className="relative mx-auto max-w-7xl px-6 py-12 md:px-8 md:py-16">
         <div
           className="
