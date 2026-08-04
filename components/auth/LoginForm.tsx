@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { useSettings } from "@/contexts/SettingsContext";
@@ -16,6 +16,7 @@ interface LoginFormProps {
 
 export default function LoginForm({ isSignUp }: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { language, routeLocale } = useSettings();
 
   const [name, setName] = useState("");
@@ -86,7 +87,21 @@ export default function LoginForm({ isSignUp }: LoginFormProps) {
     setPassword("");
     setIsSubmitting(false);
 
-    router.replace(localePath("/learn", routeLocale));
+    const redirectParam = searchParams.get("redirect");
+    const defaultDestination = localePath("/learn", routeLocale);
+
+    let destination = defaultDestination;
+
+    if (
+      redirectParam &&
+      redirectParam.startsWith("/") &&
+      !redirectParam.startsWith("//") &&
+      !redirectParam.includes("://")
+    ) {
+      destination = redirectParam;
+    }
+
+    router.replace(destination);
     router.refresh();
   }
 

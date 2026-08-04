@@ -164,7 +164,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
             }
             paymentPanel={
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
-                <div className="px-3 py-4 sm:px-5 sm:py-6">
+                <div className="pt-4 sm:pt-6">
                   <CheckoutPaymentForm
                     slug={product.slug}
                     amount={productPrice}

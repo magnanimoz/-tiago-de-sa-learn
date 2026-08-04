@@ -319,11 +319,18 @@ export async function POST(request: Request) {
       },
     );
 
+    const mercadoPagoRequestId =
+      mercadoPagoResponse.headers.get("x-request-id");
+
     const payment =
       (await mercadoPagoResponse.json()) as MercadoPagoPaymentResponse;
 
     if (!mercadoPagoResponse.ok) {
-      console.error("Erro retornado pelo Mercado Pago:", payment);
+      console.error("Erro retornado pelo Mercado Pago:", {
+        requestId: mercadoPagoRequestId,
+        status: mercadoPagoResponse.status,
+        payment,
+      });
 
       const mercadoPagoDescription = payment.cause?.[0]?.description;
       const isMercadoPagoServerError = mercadoPagoResponse.status >= 500;
@@ -377,6 +384,8 @@ export async function POST(request: Request) {
       .from("payments")
       .upsert(
         {
+          provider: "mercado_pago",
+          provider_payment_id: String(payment.id),
           mercado_pago_payment_id: payment.id,
           user_id: user.id,
           content_type: product.type,

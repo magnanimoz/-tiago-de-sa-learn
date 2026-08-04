@@ -47,29 +47,30 @@ export default function CheckoutLayout({
       </motion.div>
 
       <div className="grid items-start gap-8 lg:grid-cols-[360px_minmax(0,1fr)]">
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 22,
-            filter: "blur(4px)",
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-          }}
-          transition={{
-            duration: 1.8,
-            delay: 0.2,
-            ease: [0.18, 0.9, 0.2, 1],
-          }}
-          style={{
-            y: smoothProductOffset,
-          }}
-          className="self-start"
-        >
-          {productSummary}
-        </motion.div>
+        <div className="self-start lg:sticky lg:top-8">
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 22,
+              filter: "blur(4px)",
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+            }}
+            transition={{
+              duration: 1.8,
+              delay: 0.2,
+              ease: [0.18, 0.9, 0.2, 1],
+            }}
+            style={{
+              y: smoothProductOffset,
+            }}
+          >
+            {productSummary}
+          </motion.div>
+        </div>
 
         <motion.div
           initial={{

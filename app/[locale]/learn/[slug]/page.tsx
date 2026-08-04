@@ -68,7 +68,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
   const hasAccess = user
     ? await userHasAccessToContent({
         userId: user.id,
-        contentType: "song",
+        contentType: product.type,
         contentId: product.slug,
       })
     : false;

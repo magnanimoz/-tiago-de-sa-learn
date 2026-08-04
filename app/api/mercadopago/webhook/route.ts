@@ -242,6 +242,8 @@ export async function POST(request: Request) {
       .from("payments")
       .upsert(
         {
+          provider: "mercado_pago",
+          provider_payment_id: String(payment.id),
           mercado_pago_payment_id: payment.id,
           user_id: userId,
           content_type: contentType,

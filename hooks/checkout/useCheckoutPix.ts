@@ -22,6 +22,10 @@ type UseCheckoutPixProps = {
   onErrorChange: (message: string | null) => void;
 };
 
+export type PixFieldName = "email" | "cpf";
+
+export type PixFieldErrors = Partial<Record<PixFieldName, string>>;
+
 const supabase = createClient();
 
 export function useCheckoutPix({
@@ -41,6 +45,8 @@ export function useCheckoutPix({
   const [pixCpf, setPixCpf] = useState("");
   const [pixCopied, setPixCopied] = useState(false);
   const [isPixLoading, setIsPixLoading] = useState(false);
+  const [isPixCancelling, setIsPixCancelling] = useState(false);
+  const [pixFieldErrors, setPixFieldErrors] = useState<PixFieldErrors>({});
 
   useEffect(() => {
     if (!enabled || !pixPaymentId || checkoutStatus !== "choosing") {
@@ -139,28 +145,68 @@ export function useCheckoutPix({
     pixPaymentId,
   ]);
 
+  function clearPixFieldError(fieldName: PixFieldName) {
+    setPixFieldErrors((current) => {
+      if (!current[fieldName]) {
+        return current;
+      }
+
+      const nextErrors = { ...current };
+      delete nextErrors[fieldName];
+
+      return nextErrors;
+    });
+  }
+
+  function updatePixEmail(value: string) {
+    setPixEmail(value);
+    clearPixFieldError("email");
+    onErrorChange(null);
+  }
+
+  function updatePixCpf(value: string) {
+    setPixCpf(value);
+    clearPixFieldError("cpf");
+    onErrorChange(null);
+  }
+
   async function createPix() {
     if (isPixLoading || pixData) {
-      return;
+      return false;
     }
 
     const normalizedCpf = pixCpf.replace(/\D/g, "");
 
-    if (!pixEmail.trim()) {
-      onErrorChange(
+    const normalizedEmail = pixEmail.trim();
+
+    const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+
+    const nextFieldErrors: PixFieldErrors = {};
+
+    if (!normalizedEmail) {
+      nextFieldErrors.email =
         language === "pt"
           ? "Informe o e-mail do comprador."
-          : "Enter the buyer email.",
-      );
-      return;
+          : "Enter the buyer email.";
+    } else if (!emailIsValid) {
+      nextFieldErrors.email =
+        language === "pt"
+          ? "Informe um e-mail válido."
+          : "Enter a valid email.";
     }
 
     if (normalizedCpf.length !== 11) {
-      onErrorChange(
-        language === "pt" ? "Informe um CPF válido." : "Enter a valid CPF.",
-      );
-      return;
+      nextFieldErrors.cpf =
+        language === "pt" ? "Informe um CPF válido." : "Enter a valid CPF.";
     }
+
+    if (Object.keys(nextFieldErrors).length > 0) {
+      setPixFieldErrors(nextFieldErrors);
+      onErrorChange(null);
+      return false;
+    }
+
+    setPixFieldErrors({});
 
     setIsPixLoading(true);
     setPixCopied(false);
@@ -178,7 +224,7 @@ export function useCheckoutPix({
           paymentMethod: "pix",
           paymentData: {
             payer: {
-              email: pixEmail.trim(),
+              email: normalizedEmail,
               identification: {
                 type: "CPF",
                 number: normalizedCpf,
@@ -218,6 +264,7 @@ export function useCheckoutPix({
       setPixPaymentId(data.paymentId);
       setPixData(data.pix);
       setPixStatus(data.status ?? "pending");
+      return true;
     } catch (error) {
       console.error("Erro ao gerar Pix:", error);
 
@@ -228,6 +275,7 @@ export function useCheckoutPix({
             ? "Não foi possível gerar o pagamento Pix."
             : "Could not generate the Pix payment.",
       );
+      return false;
     } finally {
       setIsPixLoading(false);
     }
@@ -257,12 +305,68 @@ export function useCheckoutPix({
     }
   }
 
+  async function cancelPix() {
+    if (!pixPaymentId || isPixCancelling) {
+      return false;
+    }
+
+    setIsPixCancelling(true);
+    onErrorChange(null);
+
+    try {
+      const response = await fetch(`/api/payments/${pixPaymentId}/cancel`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        status?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ??
+            (language === "pt"
+              ? "Não foi possível cancelar o pagamento Pix."
+              : "Could not cancel the Pix payment."),
+        );
+      }
+
+      if (data.status !== "cancelled") {
+        throw new Error(
+          language === "pt"
+            ? "O pagamento não foi cancelado."
+            : "The payment was not cancelled.",
+        );
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Erro ao cancelar pagamento Pix:", error);
+
+      onErrorChange(
+        error instanceof Error
+          ? error.message
+          : language === "pt"
+            ? "Não foi possível cancelar o pagamento Pix."
+            : "Could not cancel the Pix payment.",
+      );
+
+      return false;
+    } finally {
+      setIsPixCancelling(false);
+    }
+  }
+
   function resetPix(options?: { clearBuyerData?: boolean }) {
     setPixPaymentId(null);
     setPixData(null);
     setPixStatus(null);
     setPixCopied(false);
     setIsPixLoading(false);
+    setPixFieldErrors({});
+    setIsPixCancelling(false);
 
     if (options?.clearBuyerData) {
       setPixEmail("");
@@ -278,9 +382,12 @@ export function useCheckoutPix({
     pixCpf,
     pixCopied,
     isPixLoading,
-    setPixEmail,
-    setPixCpf,
+    isPixCancelling,
+    pixFieldErrors,
+    setPixEmail: updatePixEmail,
+    setPixCpf: updatePixCpf,
     createPix,
+    cancelPix,
     copyPixCode,
     resetPix,
   };

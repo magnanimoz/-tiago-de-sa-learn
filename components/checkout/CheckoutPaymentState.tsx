@@ -40,19 +40,19 @@ export default function CheckoutPaymentState({
 
   const description = isApproved
     ? language === "pt"
-      ? "O acesso foi liberado e você já pode começar."
-      : "Access has been released and you can start now."
+      ? "O acesso foi liberado e você já pode começar"
+      : "Access has been released and you can start now"
     : isProcessing
       ? language === "pt"
-        ? "Estamos processando o pagamento com segurança."
-        : "We are securely processing your payment."
+        ? "Estamos processando o pagamento com segurança"
+        : "We are securely processing your payment"
       : isPending
         ? language === "pt"
-          ? "Assim que o seu pagamento for confirmado, o acesso será liberado automaticamente."
-          : "As soon as your payment is confirmed, access will be granted automatically."
+          ? "Assim que o seu pagamento for confirmado, o acesso será liberado automaticamente"
+          : "As soon as your payment is confirmed, access will be granted automatically"
         : language === "pt"
-          ? "Você pode revisar os dados e tentar novamente."
-          : "You can review the details and try again.";
+          ? "Você pode revisar os dados e tentar novamente"
+          : "You can review the details and try again";
 
   const statusLabel = isApproved
     ? language === "pt"

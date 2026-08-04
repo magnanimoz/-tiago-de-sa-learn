@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["porcelain-beef-bits-female.trycloudflare.com"],
+  allowedDevOrigins: ["iowa-pentium-disclaimers-procedure.trycloudflare.com"],
 };
 
 export default nextConfig;

@@ -20,6 +20,18 @@ type UseCheckoutCardProps = {
   onErrorChange: (message: string | null) => void;
 };
 
+export type CardFieldName =
+  | "cardNumber"
+  | "expirationDate"
+  | "securityCode"
+  | "cardholderName"
+  | "issuer"
+  | "installments"
+  | "identificationNumber"
+  | "cardholderEmail";
+
+export type CardFieldErrors = Partial<Record<CardFieldName, string>>;
+
 const publicKey = process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY;
 
 export function useCheckoutCard({
@@ -36,10 +48,173 @@ export function useCheckoutCard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cardBrand, setCardBrand] = useState<string | null>(null);
 
+  const [fieldErrors, setFieldErrors] = useState<CardFieldErrors>({});
+
+  const submitFallbackTimeoutRef = useRef<number | null>(null);
+  const secureFieldsEditedAfterErrorRef = useRef(false);
+
   const cardFormRef = useRef<MercadoPagoCardForm | null>(null);
   const isSubmittingRef = useRef(false);
 
+  function clearSubmitFallback() {
+    if (submitFallbackTimeoutRef.current !== null) {
+      window.clearTimeout(submitFallbackTimeoutRef.current);
+      submitFallbackTimeoutRef.current = null;
+    }
+  }
+
+  function revealFieldError(fieldName: CardFieldName) {
+    window.requestAnimationFrame(() => {
+      const element = document.querySelector<HTMLElement>(
+        `[data-card-field="${fieldName}"]`,
+      );
+
+      if (!element) {
+        return;
+      }
+
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      element.classList.remove("checkout-field-shake");
+
+      void element.offsetWidth;
+
+      element.classList.add("checkout-field-shake");
+
+      window.setTimeout(() => {
+        element.classList.remove("checkout-field-shake");
+      }, 450);
+    });
+  }
+
+  function showFieldErrors(errors: CardFieldErrors) {
+    setFieldErrors(errors);
+
+    const firstField = Object.keys(errors)[0] as CardFieldName | undefined;
+
+    if (firstField) {
+      revealFieldError(firstField);
+    }
+  }
+
+  function clearFieldError(fieldName: CardFieldName) {
+    if (
+      fieldName === "cardNumber" ||
+      fieldName === "expirationDate" ||
+      fieldName === "securityCode"
+    ) {
+      secureFieldsEditedAfterErrorRef.current = true;
+    }
+
+    setFieldErrors((current) => {
+      if (!current[fieldName]) {
+        return current;
+      }
+
+      const nextErrors = { ...current };
+      delete nextErrors[fieldName];
+
+      return nextErrors;
+    });
+  }
+
+  function handleSubmitAttempt() {
+    clearSubmitFallback();
+
+    const errors: CardFieldErrors = {};
+
+    const cardholderName =
+      document
+        .querySelector<HTMLInputElement>("#form-checkout__cardholderName")
+        ?.value.trim() ?? "";
+
+    const identificationNumber =
+      document
+        .querySelector<HTMLInputElement>("#form-checkout__identificationNumber")
+        ?.value.trim() ?? "";
+
+    const cardholderEmail =
+      document
+        .querySelector<HTMLInputElement>("#form-checkout__cardholderEmail")
+        ?.value.trim() ?? "";
+
+    const installments =
+      document.querySelector<HTMLSelectElement>("#form-checkout__installments")
+        ?.value ?? "";
+
+    if (!cardholderName) {
+      errors.cardholderName =
+        language === "pt"
+          ? "Informe o nome escrito no cartão."
+          : "Enter the name shown on the card.";
+    }
+
+    if (!installments) {
+      errors.installments =
+        language === "pt"
+          ? "Selecione o número de parcelas."
+          : "Select the number of installments.";
+    }
+
+    if (!identificationNumber) {
+      errors.identificationNumber =
+        language === "pt"
+          ? "Informe o número do documento."
+          : "Enter the document number.";
+    }
+
+    if (!cardholderEmail) {
+      errors.cardholderEmail =
+        language === "pt" ? "Informe o e-mail." : "Enter the email.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      if (secureFieldsEditedAfterErrorRef.current) {
+        showFieldErrors(errors);
+        return false;
+      }
+
+      const secureFieldsMessage =
+        language === "pt"
+          ? "Confira o número do cartão, a validade e o código de segurança."
+          : "Check the card number, expiration date and security code.";
+
+      showFieldErrors({
+        cardNumber: secureFieldsMessage,
+        expirationDate: secureFieldsMessage,
+        securityCode: secureFieldsMessage,
+        ...errors,
+      });
+
+      return false;
+    }
+
+    submitFallbackTimeoutRef.current = window.setTimeout(() => {
+      secureFieldsEditedAfterErrorRef.current = false;
+
+      const message =
+        language === "pt"
+          ? "Confira o número do cartão, a validade e o código de segurança."
+          : "Check the card number, expiration date and security code.";
+
+      showFieldErrors({
+        cardNumber: message,
+
+        expirationDate: message,
+
+        securityCode: message,
+      });
+    }, 700);
+
+    return true;
+  }
+
   function resetCard() {
+    secureFieldsEditedAfterErrorRef.current = false;
+
     cardFormRef.current?.unmount?.();
     cardFormRef.current = null;
     isSubmittingRef.current = false;
@@ -47,6 +222,9 @@ export function useCheckoutCard({
     setCardReady(false);
     setIsSubmitting(false);
     setCardBrand(null);
+
+    clearSubmitFallback();
+    setFieldErrors({});
   }
 
   useEffect(() => {
@@ -205,6 +383,9 @@ export function useCheckoutCard({
             onSubmit: async (event: Event) => {
               event.preventDefault();
 
+              clearSubmitFallback();
+              setFieldErrors({});
+
               if (isSubmittingRef.current) {
                 return;
               }
@@ -338,6 +519,8 @@ export function useCheckoutCard({
 
     return () => {
       cancelled = true;
+      clearSubmitFallback();
+
       cardFormRef.current?.unmount?.();
       cardFormRef.current = null;
       isSubmittingRef.current = false;
@@ -357,6 +540,9 @@ export function useCheckoutCard({
     cardReady,
     cardBrand,
     isSubmitting,
+    fieldErrors,
+    handleSubmitAttempt,
+    clearFieldError,
     resetCard,
   };
 }

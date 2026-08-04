@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+
+import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { formatPrice } from "@/lib/format-price";
 import { localePath } from "@/lib/locale-path";
 import type { Price } from "@/types/price";
-import { formatPrice } from "@/lib/format-price";
 
 type LibraryCardProps = {
   title: string;
@@ -26,19 +28,31 @@ export default function LibraryCard({
   acquired = false,
 }: LibraryCardProps) {
   const { routeLocale } = useSettings();
+  const { isAuthenticated, isLoading } = useAuth();
 
   const localizedHref = localePath(href, routeLocale);
+  const loginPath = localePath("/login", routeLocale);
+
+  const destination = isAuthenticated
+    ? localizedHref
+    : `${loginPath}?redirect=${encodeURIComponent(localizedHref)}`;
 
   return (
     <Link
-      href={localizedHref}
+      href={destination}
+      onClick={(event) => {
+        if (isLoading) {
+          event.preventDefault();
+        }
+      }}
+      aria-disabled={isLoading}
       className="group/card block w-[320px] flex-shrink-0 transition-transform duration-700 ease-out hover:scale-[1.07]"
     >
       <div className="relative aspect-[369/207] overflow-hidden rounded-2xl bg-card">
         <img
           src={image}
           alt={title}
-          className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover/card:scale-107"
+          className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover/card:scale-[1.07]"
         />
 
         <div className="absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100" />
@@ -53,14 +67,11 @@ export default function LibraryCard({
               border border-white/20
               bg-black/40
               backdrop-blur-xl
-
               opacity-0
               scale-75
-
               transition-all
               duration-300
               ease-out
-
               group-hover/card:opacity-100
               group-hover/card:scale-100
             "
@@ -91,7 +102,8 @@ export default function LibraryCard({
           <p className="text-xs uppercase tracking-[0.12em] text-white/70">
             {artist}
           </p>
-          <h3 className=" line-clamp-1 text-base font-medium tracking-[-0.02em] text-white">
+
+          <h3 className="line-clamp-1 text-base font-medium tracking-[-0.02em] text-white">
             {title}
           </h3>
         </div>

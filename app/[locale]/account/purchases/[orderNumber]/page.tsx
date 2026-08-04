@@ -52,8 +52,8 @@ function getStatusConfig(status: PurchaseStatus, language: "pt" | "en") {
       label: language === "pt" ? "Pagamento recusado" : "Payment failed",
       description:
         language === "pt"
-          ? "Não foi possível concluir o pagamento."
-          : "The payment could not be completed.",
+          ? "Não foi possível concluir o pagamento"
+          : "The payment could not be completed",
       className: "border-red-400/20 bg-red-400/10 text-red-200",
       dotClassName: "bg-red-300",
     },
