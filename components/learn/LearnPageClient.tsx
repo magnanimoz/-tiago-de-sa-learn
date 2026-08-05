@@ -40,6 +40,35 @@ type LearnPageClientProps = {
 
 const softEase = [0.22, 1, 0.36, 1] as const;
 
+const shelvesVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      delayChildren: 0.6,
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const shelfItemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 8,
+    scale: 0.99,
+    filter: "blur(3px)",
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.95,
+      ease: softEase,
+    },
+  },
+};
+
 export default function LearnPageClient({
   purchasedProducts,
   featuredProducts,
@@ -49,7 +78,6 @@ export default function LearnPageClient({
 }: LearnPageClientProps) {
   const [search, setSearch] = useState("");
   const { language, currency } = useSettings();
-  const [hasMounted, setHasMounted] = useState(false);
   const learnLabel = t(learnText.learn, language);
 
   const pinkBlobRef = useRef<HTMLDivElement>(null);
@@ -164,90 +192,110 @@ export default function LearnPageClient({
 
       <main className="relative min-h-screen overflow-x-clip pb-32 pt-24 sm:pt-28">
         <Container>
-          <div className="max-w-2xl">
-            <motion.p
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: {
-                  transition: {
-                    delayChildren: 0.15,
-                    staggerChildren: 0.08,
+          <div
+            className="
+              grid
+              items-end
+              gap-8
+              lg:grid-cols-[minmax(0,1.05fr)_minmax(400px,0.95fr)]
+              lg:gap-16
+            "
+          >
+            <div className="max-w-2xl">
+              <motion.p
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: {
+                    transition: {
+                      delayChildren: 0.15,
+                      staggerChildren: 0.08,
+                    },
                   },
-                },
-              }}
-              aria-label={learnLabel}
-              className="
-                text-2xl
-                font-medium
-                font-stretch-150%
-                uppercase
-                tracking-[0.28em]
-                text-magenta
-                sm:text-3xl
-              "
-            >
-              {Array.from(learnLabel).map((character, index) => (
-                <motion.span
-                  key={`${character}-${index}`}
-                  aria-hidden="true"
-                  variants={{
-                    hidden: {
-                      opacity: 0,
-                      x: -6,
-                      filter: "blur(4px)",
-                    },
-                    visible: {
-                      opacity: 1,
-                      x: 0,
-                      filter: "blur(0px)",
-                      transition: {
-                        duration: 0.5,
-                        ease: softEase,
+                }}
+                aria-label={learnLabel}
+                className="
+                  text-2xl
+                  font-medium
+                  font-stretch-150%
+                  uppercase
+                  tracking-[0.28em]
+                  text-magenta
+                  sm:text-3xl
+                "
+              >
+                {Array.from(learnLabel).map((character, index) => (
+                  <motion.span
+                    key={`${character}-${index}`}
+                    aria-hidden="true"
+                    variants={{
+                      hidden: {
+                        opacity: 0,
+                        x: -6,
+                        filter: "blur(4px)",
                       },
-                    },
-                  }}
-                  className="inline-block"
-                >
-                  {character === " " ? "\u00A0" : character}
-                </motion.span>
-              ))}
-            </motion.p>
+                      visible: {
+                        opacity: 1,
+                        x: 0,
+                        filter: "blur(0px)",
+                        transition: {
+                          duration: 0.5,
+                          ease: softEase,
+                        },
+                      },
+                    }}
+                    className="inline-block"
+                  >
+                    {character === " " ? "\u00A0" : character}
+                  </motion.span>
+                ))}
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.9,
+                  ease: softEase,
+                  delay: 0.32,
+                }}
+                className="
+                  mt-1.5
+                  max-w-xl
+                  text-base
+                  leading-7
+                  text-white/44
+                  sm:text-lg
+                  sm:leading-8
+                "
+              >
+                {t(learnText.subtitle, language)}
+              </motion.div>
+            </div>
 
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: 0.9,
+                delay: 0.4,
                 ease: softEase,
-                delay: 0.32,
               }}
-              className="
-                mt-1.5
-                max-w-xl
-                text-base
-                font-normal
-                leading-7
-                text-white/44
-                sm:text-lg
-                sm:leading-8
-              "
+              className="mt-2 w-full lg:mt-0 lg:pb-1"
             >
-              {t(learnText.subtitle, language)}
-            </motion.div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{
-              duration: 1.2,
-              ease: "easeOut",
-              delay: 0.45,
-            }}
-          >
-            <div className="mb-10 mt-6 max-w-2xl">
+              <p
+                className="
+                  mb-2.5
+                  text-[11px]
+                  font-medium
+                  uppercase
+                  tracking-[0.18em]
+                  text-white/30
+                "
+              >
+                {language === "pt" ? "Explorar catálogo" : "Explore catalog"}
+              </p>
               <div
                 className="
                   group
@@ -260,18 +308,14 @@ export default function LearnPageClient({
                   bg-white/[0.025]
                   px-4
                   shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]
-                  transition-[background-color,border-color,box-shadow,transform]
+                  transition-[background-color,border-color,box-shadow]
                   duration-500
                   ease-[cubic-bezier(0.22,1,0.36,1)]
-
                   hover:border-white/[0.13]
                   hover:bg-white/[0.032]
-
                   focus-within:border-white/[0.18]
                   focus-within:bg-white/[0.04]
                   focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_30px_rgba(0,0,0,0.16)]
-
-                  motion-reduce:transform-none
                 "
               >
                 <svg
@@ -295,7 +339,6 @@ export default function LearnPageClient({
                   aria-hidden="true"
                 >
                   <circle cx="11" cy="11" r="7" />
-
                   <path d="m20 20-3.5-3.5" />
                 </svg>
 
@@ -354,39 +397,33 @@ export default function LearnPageClient({
                       aria-hidden="true"
                     >
                       <path d="M18 6 6 18" />
-
                       <path d="M6 6l12 12" />
                     </svg>
                   </button>
                 )}
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
 
           <motion.div
             aria-hidden="true"
-            initial={{
-              opacity: 0,
-              scaleX: 0,
-            }}
-            animate={{
-              opacity: 1,
-              scaleX: 1,
-            }}
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
             transition={{
               duration: 1.15,
               delay: 0.62,
-              ease: [0.22, 1, 0.36, 1],
+              ease: softEase,
             }}
             className="
               mb-10
+              mt-10
               h-px
               w-full
-              max-w-2xl
               origin-left
               bg-gradient-to-r
-              from-white/[0.09]
-              via-white/[0.05]
+              from-white/[0.04]
+              via-white/[0.06]
+              to-white/[0.04]
               to-transparent
               will-change-transform
             "
@@ -444,8 +481,9 @@ export default function LearnPageClient({
                 <motion.div
                   key="shelves"
                   className="space-y-4 md:space-y-8"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  variants={shelvesVariants}
+                  initial="hidden"
+                  animate="visible"
                   exit={{
                     opacity: 0,
                     transition: {
@@ -453,137 +491,111 @@ export default function LearnPageClient({
                       ease: "easeOut",
                     },
                   }}
-                  transition={{
-                    duration: hasMounted ? 0.25 : 0.6,
-                    ease: "easeOut",
-                  }}
-                  onAnimationComplete={() => {
-                    setHasMounted(true);
-                  }}
                 >
                   {purchasedProducts.length > 0 && (
-                    <section id="purchases" className="scroll-mt-28">
-                      <motion.div
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          delay: hasMounted ? 0 : 0.65,
-                          duration: 1.5,
-                          ease: "easeOut",
-                        }}
-                      >
-                        <Shelf title={t(learnText.myPurchases, language)}>
-                          {purchasedProducts.map((product) => (
-                            <LibraryCard
-                              key={`${product.type}-${product.slug}`}
-                              artist={product.artist}
-                              title={t(product.title, language)}
-                              price={product.price}
-                              currency={currency}
-                              image={product.image}
-                              href={product.href}
-                              acquired
-                            />
-                          ))}
-                        </Shelf>
-                      </motion.div>
-                    </section>
+                    <motion.section
+                      id="purchases"
+                      className="scroll-mt-28"
+                      variants={shelfItemVariants}
+                    >
+                      <Shelf title={t(learnText.myPurchases, language)}>
+                        {purchasedProducts.map((product) => (
+                          <LibraryCard
+                            key={`${product.type}-${product.slug}`}
+                            artist={product.artist}
+                            title={t(product.title, language)}
+                            price={product.price}
+                            currency={currency}
+                            image={product.image}
+                            href={product.href}
+                            acquired
+                          />
+                        ))}
+                      </Shelf>
+                    </motion.section>
                   )}
 
                   {featuredProducts.length > 0 && (
-                    <section id="featured" className="scroll-mt-28">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          delay: hasMounted ? 0 : 0.75,
-                          duration: 1.5,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                      >
-                        <Shelf title={t(learnText.recentlyAdded, language)}>
-                          {featuredProducts.map((product) => (
-                            <LibraryCard
-                              key={`${product.type}-${product.slug}`}
-                              artist={product.artist}
-                              title={t(product.title, language)}
-                              price={product.price}
-                              currency={currency}
-                              image={product.image}
-                              href={product.href}
-                              acquired={product.hasAccess}
-                            />
-                          ))}
-                        </Shelf>
-                      </motion.div>
-                    </section>
+                    <motion.section
+                      id="featured"
+                      className="scroll-mt-28"
+                      variants={shelfItemVariants}
+                    >
+                      <Shelf title={t(learnText.recentlyAdded, language)}>
+                        {featuredProducts.map((product) => (
+                          <LibraryCard
+                            key={`${product.type}-${product.slug}`}
+                            artist={product.artist}
+                            title={t(product.title, language)}
+                            price={product.price}
+                            currency={currency}
+                            image={product.image}
+                            href={product.href}
+                            acquired={product.hasAccess}
+                          />
+                        ))}
+                      </Shelf>
+                    </motion.section>
                   )}
 
                   {songs.length > 0 && (
-                    <Section id="songs" title={t(learnText.songs, language)}>
-                      {songs.map((song) => (
-                        <LibraryCard
-                          key={song.slug}
-                          artist={song.artist}
-                          title={t(song.title, language)}
-                          price={song.price}
-                          currency={currency}
-                          image={song.image}
-                          href={song.href}
-                          acquired={song.hasAccess}
-                        />
-                      ))}
-                    </Section>
+                    <motion.div variants={shelfItemVariants}>
+                      <Section id="songs" title={t(learnText.songs, language)}>
+                        {songs.map((song) => (
+                          <LibraryCard
+                            key={song.slug}
+                            artist={song.artist}
+                            title={t(song.title, language)}
+                            price={song.price}
+                            currency={currency}
+                            image={song.image}
+                            href={song.href}
+                            acquired={song.hasAccess}
+                          />
+                        ))}
+                      </Section>
+                    </motion.div>
                   )}
 
                   {courses.length > 0 && (
-                    <Section
-                      id="courses"
-                      title={t(learnText.courses, language)}
-                      countLabel={
-                        language === "pt"
-                          ? `${courses.length} ${courses.length === 1 ? "curso" : "cursos"}`
-                          : `${courses.length} ${courses.length === 1 ? "course" : "courses"}`
-                      }
-                    >
-                      {courses.map((course) => (
-                        <LibraryCard
-                          key={course.slug}
-                          artist={course.artist}
-                          title={t(course.title, language)}
-                          price={course.price}
-                          currency={currency}
-                          image={course.image}
-                          href={course.href}
-                          acquired={course.hasAccess}
-                        />
-                      ))}
-                    </Section>
+                    <motion.div variants={shelfItemVariants}>
+                      <Section
+                        id="courses"
+                        title={t(learnText.courses, language)}
+                      >
+                        {courses.map((course) => (
+                          <LibraryCard
+                            key={course.slug}
+                            artist={course.artist}
+                            title={t(course.title, language)}
+                            price={course.price}
+                            currency={currency}
+                            image={course.image}
+                            href={course.href}
+                            acquired={course.hasAccess}
+                          />
+                        ))}
+                      </Section>
+                    </motion.div>
                   )}
 
                   {packs.length > 0 && (
-                    <Section
-                      id="packs"
-                      title={t(learnText.packs, language)}
-                      countLabel={
-                        language === "pt"
-                          ? `${packs.length} ${packs.length === 1 ? "pack" : "packs"}`
-                          : `${packs.length} ${packs.length === 1 ? "pack" : "packs"}`
-                      }
-                    >
-                      {packs.map((pack) => (
-                        <LibraryCard
-                          key={pack.slug}
-                          artist={pack.artist}
-                          title={t(pack.title, language)}
-                          price={pack.price}
-                          currency={currency}
-                          image={pack.image}
-                          href={pack.href}
-                          acquired={pack.hasAccess}
-                        />
-                      ))}
-                    </Section>
+                    <motion.div variants={shelfItemVariants}>
+                      <Section id="packs" title={t(learnText.packs, language)}>
+                        {packs.map((pack) => (
+                          <LibraryCard
+                            key={pack.slug}
+                            artist={pack.artist}
+                            title={t(pack.title, language)}
+                            price={pack.price}
+                            currency={currency}
+                            image={pack.image}
+                            href={pack.href}
+                            acquired={pack.hasAccess}
+                          />
+                        ))}
+                      </Section>
+                    </motion.div>
                   )}
                 </motion.div>
               )}

@@ -99,7 +99,7 @@ export default function LibraryCard({
             relative
             aspect-[16/9]
             overflow-hidden
-            rounded-xl
+            rounded-2xl
             border
             border-white/[0.10]
             bg-[#111214]
