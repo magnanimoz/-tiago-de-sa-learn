@@ -10,6 +10,7 @@ import { learnText } from "@/lib/i18n/learn";
 import SearchResults from "@/components/learn/SearchResults";
 import { AnimatePresence, motion } from "framer-motion";
 import { useBlobParallax } from "@/hooks/useBlobParallax";
+import Section from "@/components/learn/Section";
 
 type LearnProductCard = {
   slug: string;
@@ -37,6 +38,8 @@ type LearnPageClientProps = {
   packs: LearnProductCard[];
 };
 
+const softEase = [0.22, 1, 0.36, 1] as const;
+
 export default function LearnPageClient({
   purchasedProducts,
   featuredProducts,
@@ -46,7 +49,7 @@ export default function LearnPageClient({
 }: LearnPageClientProps) {
   const [search, setSearch] = useState("");
   const { language, currency } = useSettings();
-  const hasMounted = useRef(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const learnLabel = t(learnText.learn, language);
 
   const pinkBlobRef = useRef<HTMLDivElement>(null);
@@ -87,54 +90,81 @@ export default function LearnPageClient({
 
   return (
     <>
-      <main className="relative min-h-screen overflow-x-clip pb-32 pt-32">
-        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div
-            className="
-              absolute
-              left-[-14rem]
-              top-0
-              h-[20rem]
-              w-[32rem]
-              opacity-0
-              scale-150
-              animate-[blobFadeIn_1.2s_ease-out_forwards]
-              "
-          >
-            <div
-              ref={pinkBlobRef}
-              className="h-full w-full will-change-transform"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(230, 0, 126, 0.18) 0%, rgba(230, 0, 126, 0.08) 38%, transparent 72%)",
-              }}
-            />
-          </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-20 bg-[#070809]"
+      />
 
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      >
+        <div
+          className="
+
+          absolute
+
+          left-[-14rem]
+
+          top-0
+
+          h-[20rem]
+
+          w-[32rem]
+
+          scale-150
+
+          opacity-0
+
+          animate-[blobFadeIn_1.2s_ease-out_forwards]
+
+        "
+        >
           <div
-            className="
-              absolute
-              right-[-12rem]
-              top-[24rem]
-              h-[40rem]
-              w-[30rem]
-              opacity-0
-              scale-130
-              animate-[blobFadeIn_1.2s_ease-out_250ms_forwards]
-              "
-          >
-            <div
-              ref={blueBlobRef}
-              className="h-full w-full will-change-transform"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(59, 130, 246, 0.08) 38%, transparent 72%)",
-              }}
-            />
-          </div>
+            ref={pinkBlobRef}
+            className="h-full w-full will-change-transform"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(230,0,126,0.18) 0%, rgba(230,0,126,0.08) 38%, transparent 72%)",
+            }}
+          />
         </div>
+
+        <div
+          className="
+
+          absolute
+
+          right-[-12rem]
+
+          top-[24rem]
+
+          h-[40rem]
+
+          w-[30rem]
+
+          scale-130
+
+          opacity-0
+
+          animate-[blobFadeIn_1.2s_ease-out_250ms_forwards]
+
+        "
+        >
+          <div
+            ref={blueBlobRef}
+            className="h-full w-full will-change-transform"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0.08) 38%, transparent 72%)",
+            }}
+          />
+        </div>
+      </div>
+
+      <main className="relative min-h-screen overflow-x-clip pb-32 pt-24 sm:pt-28">
         <Container>
-          <div className="max-w-3xl">
+          <div className="max-w-2xl">
             <motion.p
               initial="hidden"
               animate="visible"
@@ -142,18 +172,20 @@ export default function LearnPageClient({
                 hidden: {},
                 visible: {
                   transition: {
-                    delayChildren: 0.2,
-                    staggerChildren: 0.14,
+                    delayChildren: 0.15,
+                    staggerChildren: 0.08,
                   },
                 },
               }}
               aria-label={learnLabel}
               className="
-                text-4xl
+                text-2xl
+                font-medium
                 font-stretch-150%
                 uppercase
-                tracking-[0.3em]
+                tracking-[0.28em]
                 text-magenta
+                sm:text-3xl
               "
             >
               {Array.from(learnLabel).map((character, index) => (
@@ -163,7 +195,7 @@ export default function LearnPageClient({
                   variants={{
                     hidden: {
                       opacity: 0,
-                      x: -8,
+                      x: -6,
                       filter: "blur(4px)",
                     },
                     visible: {
@@ -171,8 +203,8 @@ export default function LearnPageClient({
                       x: 0,
                       filter: "blur(0px)",
                       transition: {
-                        duration: 0.55,
-                        ease: [0.22, 1, 0.36, 1],
+                        duration: 0.5,
+                        ease: softEase,
                       },
                     },
                   }}
@@ -183,28 +215,24 @@ export default function LearnPageClient({
               ))}
             </motion.p>
 
-            {/* <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{
-                duration: 1.2,
-                ease: "easeOut",
-                delay: 0.25,
-              }}
-              className="mt-6 text-5xl font-medium font-stretch-125% tracking-[-0.05em]"
-            >
-              {t(learnText.title, language)}
-            </motion.div> */}
-
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{
-                duration: 1.2,
-                ease: "easeOut",
-                delay: 0.35,
+                duration: 0.9,
+                ease: softEase,
+                delay: 0.32,
               }}
-              className="mt-1 max-w-2xl text-lg leading-8 text-muted"
+              className="
+                mt-1.5
+                max-w-xl
+                text-base
+                font-normal
+                leading-7
+                text-white/44
+                sm:text-lg
+                sm:leading-8
+              "
             >
               {t(learnText.subtitle, language)}
             </motion.div>
@@ -219,54 +247,114 @@ export default function LearnPageClient({
               delay: 0.45,
             }}
           >
-            <div className="mt-8 mb-12">
+            <div className="mb-10 mt-6 max-w-2xl">
               <div
                 className="
-                  flex h-14 items-center
-                  rounded-4xl
-                  border border-border
-                  bg-card/40
-                  px-5
-                  backdrop-blur-sm
-                  transition-colors duration-200
-                  focus-within:bg-card/60
-                  focus-within:border-white/35
+                  group
+                  flex
+                  h-12
+                  items-center
+                  rounded-xl
+                  border
+                  border-white/[0.09]
+                  bg-white/[0.025]
+                  px-4
+                  shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]
+                  transition-[background-color,border-color,box-shadow,transform]
+                  duration-500
+                  ease-[cubic-bezier(0.22,1,0.36,1)]
+
+                  hover:border-white/[0.13]
+                  hover:bg-white/[0.032]
+
+                  focus-within:border-white/[0.18]
+                  focus-within:bg-white/[0.04]
+                  focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_30px_rgba(0,0,0,0.16)]
+
+                  motion-reduce:transform-none
                 "
               >
                 <svg
-                  className="h-5 w-5 text-muted"
+                  className="
+                    h-4
+                    w-4
+                    shrink-0
+                    text-white/30
+                    transition-all
+                    duration-300
+                    sm:h-5
+                    sm:w-5
+                    group-focus-within:scale-[1.04]
+                    group-focus-within:text-magenta
+                    group-focus-within:drop-shadow-[0_0_8px_rgba(230,0,126,0.32)]
+                  "
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
+                  aria-hidden="true"
                 >
                   <circle cx="11" cy="11" r="7" />
+
                   <path d="m20 20-3.5-3.5" />
                 </svg>
+
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(event) => setSearch(event.target.value)}
                   placeholder={t(learnText.searchPlaceholder, language)}
-                  className="ml-4 w-full bg-transparent text-base text-white outline-none placeholder:text-muted"
+                  className="
+                    ml-3
+                    min-w-0
+                    flex-1
+                    bg-transparent
+                    text-sm
+                    text-white
+                    outline-none
+                    placeholder:text-white/30
+                    sm:ml-4
+                    sm:text-base
+                  "
                 />
+
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="flex h-10 w-10 items-center justify-center rounded-full text-muted transition-all duration-300 hover:bg-white/5 hover:text-white"
+                    className="
+                      flex
+                      h-8
+                      w-8
+                      shrink-0
+                      items-center
+                      justify-center
+                      rounded-full
+                      text-white/35
+                      transition-all
+                      duration-200
+                      sm:h-9
+                      sm:w-9
+                      hover:bg-white/[0.06]
+                      hover:text-white
+                      focus-visible:outline-none
+                      focus-visible:ring-2
+                      focus-visible:ring-white/30
+                    "
                     aria-label={t(learnText.clearSearch, language)}
                   >
                     <svg
-                      className="h-5 w-5"
+                      className="h-4 w-4 sm:h-[18px] sm:w-[18px]"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                      aria-hidden="true"
                     >
                       <path d="M18 6 6 18" />
+
                       <path d="M6 6l12 12" />
                     </svg>
                   </button>
@@ -275,6 +363,34 @@ export default function LearnPageClient({
             </div>
           </motion.div>
 
+          <motion.div
+            aria-hidden="true"
+            initial={{
+              opacity: 0,
+              scaleX: 0,
+            }}
+            animate={{
+              opacity: 1,
+              scaleX: 1,
+            }}
+            transition={{
+              duration: 1.15,
+              delay: 0.62,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="
+              mb-10
+              h-px
+              w-full
+              max-w-2xl
+              origin-left
+              bg-gradient-to-r
+              from-white/[0.09]
+              via-white/[0.05]
+              to-transparent
+              will-change-transform
+            "
+          />
           <div
             className="
               min-h-[65svh]
@@ -290,6 +406,33 @@ export default function LearnPageClient({
                   exit={{ opacity: 0, y: -16 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                 >
+                  <div className="mb-8 flex items-center justify-between gap-4">
+                    <p className="min-w-0 text-sm text-white/45">
+                      {t(learnText.resultsFor, language)}{" "}
+                      <span className="font-medium text-white/80">
+                        “{search.trim()}”
+                      </span>
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="
+                        shrink-0
+                        text-sm
+                        text-white/45
+                        transition-colors
+                        duration-200
+                        hover:text-white
+                        focus-visible:outline-none
+                        focus-visible:text-white
+                        focus-visible:underline
+                        focus-visible:underline-offset-4
+                      "
+                    >
+                      {t(learnText.clearSearch, language)}
+                    </button>
+                  </div>
                   <SearchResults
                     search={search}
                     language={language}
@@ -300,6 +443,7 @@ export default function LearnPageClient({
               ) : (
                 <motion.div
                   key="shelves"
+                  className="space-y-4 md:space-y-8"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{
@@ -310,179 +454,136 @@ export default function LearnPageClient({
                     },
                   }}
                   transition={{
-                    duration: hasMounted.current ? 0.25 : 0.6,
+                    duration: hasMounted ? 0.25 : 0.6,
                     ease: "easeOut",
                   }}
-                  onAnimationStart={() => {
-                    hasMounted.current = true;
+                  onAnimationComplete={() => {
+                    setHasMounted(true);
                   }}
                 >
                   {purchasedProducts.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        delay: hasMounted.current ? 0 : 0.65,
-                        duration: 1.5,
-                        ease: "easeOut",
-                      }}
-                    >
-                      <Shelf title={t(learnText.myPurchases, language)}>
-                        {purchasedProducts.map((product) => (
-                          <LibraryCard
-                            key={`${product.type}-${product.slug}`}
-                            artist={product.artist}
-                            title={t(product.title, language)}
-                            price={product.price}
-                            currency={currency}
-                            image={product.image}
-                            href={product.href}
-                            acquired
-                          />
-                        ))}
-                      </Shelf>
-                    </motion.div>
+                    <section id="purchases" className="scroll-mt-28">
+                      <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          delay: hasMounted ? 0 : 0.65,
+                          duration: 1.5,
+                          ease: "easeOut",
+                        }}
+                      >
+                        <Shelf title={t(learnText.myPurchases, language)}>
+                          {purchasedProducts.map((product) => (
+                            <LibraryCard
+                              key={`${product.type}-${product.slug}`}
+                              artist={product.artist}
+                              title={t(product.title, language)}
+                              price={product.price}
+                              currency={currency}
+                              image={product.image}
+                              href={product.href}
+                              acquired
+                            />
+                          ))}
+                        </Shelf>
+                      </motion.div>
+                    </section>
                   )}
 
                   {featuredProducts.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        delay: hasMounted.current ? 0 : 0.75,
-                        duration: 1.5,
-                        ease: [0.22, 1, 0.36, 1],
-                      }}
-                    >
-                      <Shelf title={t(learnText.recentlyAdded, language)}>
-                        {featuredProducts.map((product) => (
-                          <LibraryCard
-                            key={`${product.type}-${product.slug}`}
-                            artist={product.artist}
-                            title={t(product.title, language)}
-                            price={product.price}
-                            currency={currency}
-                            image={product.image}
-                            href={product.href}
-                            acquired={product.hasAccess}
-                          />
-                        ))}
-                      </Shelf>
-                    </motion.div>
+                    <section id="featured" className="scroll-mt-28">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          delay: hasMounted ? 0 : 0.75,
+                          duration: 1.5,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                      >
+                        <Shelf title={t(learnText.recentlyAdded, language)}>
+                          {featuredProducts.map((product) => (
+                            <LibraryCard
+                              key={`${product.type}-${product.slug}`}
+                              artist={product.artist}
+                              title={t(product.title, language)}
+                              price={product.price}
+                              currency={currency}
+                              image={product.image}
+                              href={product.href}
+                              acquired={product.hasAccess}
+                            />
+                          ))}
+                        </Shelf>
+                      </motion.div>
+                    </section>
                   )}
 
                   {songs.length > 0 && (
-                    <motion.div
-                      initial={{
-                        opacity: 0,
-                        y: 24,
-                        filter: "blur(5px)",
-                      }}
-                      whileInView={{
-                        opacity: 1,
-                        y: 0,
-                        filter: "blur(0px)",
-                      }}
-                      viewport={{
-                        once: true,
-                        amount: 0.12,
-                      }}
-                      transition={{
-                        duration: 1.1,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                    >
-                      <Shelf title={t(learnText.songs, language)}>
-                        {songs.map((song) => (
-                          <LibraryCard
-                            key={song.slug}
-                            artist={song.artist}
-                            title={t(song.title, language)}
-                            price={song.price}
-                            currency={currency}
-                            image={song.image}
-                            href={song.href}
-                            acquired={song.hasAccess}
-                          />
-                        ))}
-                      </Shelf>
-                    </motion.div>
+                    <Section id="songs" title={t(learnText.songs, language)}>
+                      {songs.map((song) => (
+                        <LibraryCard
+                          key={song.slug}
+                          artist={song.artist}
+                          title={t(song.title, language)}
+                          price={song.price}
+                          currency={currency}
+                          image={song.image}
+                          href={song.href}
+                          acquired={song.hasAccess}
+                        />
+                      ))}
+                    </Section>
                   )}
 
                   {courses.length > 0 && (
-                    <motion.div
-                      initial={{
-                        opacity: 0,
-                        y: 24,
-                        filter: "blur(5px)",
-                      }}
-                      whileInView={{
-                        opacity: 1,
-                        y: 0,
-                        filter: "blur(0px)",
-                      }}
-                      viewport={{
-                        once: true,
-                        amount: 0.12,
-                      }}
-                      transition={{
-                        duration: 1.1,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
+                    <Section
+                      id="courses"
+                      title={t(learnText.courses, language)}
+                      countLabel={
+                        language === "pt"
+                          ? `${courses.length} ${courses.length === 1 ? "curso" : "cursos"}`
+                          : `${courses.length} ${courses.length === 1 ? "course" : "courses"}`
+                      }
                     >
-                      <Shelf title={t(learnText.courses, language)}>
-                        {courses.map((course) => (
-                          <LibraryCard
-                            key={course.slug}
-                            artist={course.artist}
-                            title={t(course.title, language)}
-                            price={course.price}
-                            currency={currency}
-                            image={course.image}
-                            href={course.href}
-                            acquired={course.hasAccess}
-                          />
-                        ))}
-                      </Shelf>
-                    </motion.div>
+                      {courses.map((course) => (
+                        <LibraryCard
+                          key={course.slug}
+                          artist={course.artist}
+                          title={t(course.title, language)}
+                          price={course.price}
+                          currency={currency}
+                          image={course.image}
+                          href={course.href}
+                          acquired={course.hasAccess}
+                        />
+                      ))}
+                    </Section>
                   )}
 
                   {packs.length > 0 && (
-                    <motion.div
-                      initial={{
-                        opacity: 0,
-                        y: 24,
-                        filter: "blur(5px)",
-                      }}
-                      whileInView={{
-                        opacity: 1,
-                        y: 0,
-                        filter: "blur(0px)",
-                      }}
-                      viewport={{
-                        once: true,
-                        amount: 0.12,
-                      }}
-                      transition={{
-                        duration: 1.1,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
+                    <Section
+                      id="packs"
+                      title={t(learnText.packs, language)}
+                      countLabel={
+                        language === "pt"
+                          ? `${packs.length} ${packs.length === 1 ? "pack" : "packs"}`
+                          : `${packs.length} ${packs.length === 1 ? "pack" : "packs"}`
+                      }
                     >
-                      <Shelf title={t(learnText.packs, language)}>
-                        {packs.map((pack) => (
-                          <LibraryCard
-                            key={pack.slug}
-                            artist={pack.artist}
-                            title={t(pack.title, language)}
-                            price={pack.price}
-                            currency={currency}
-                            image={pack.image}
-                            href={pack.href}
-                            acquired={pack.hasAccess}
-                          />
-                        ))}
-                      </Shelf>
-                    </motion.div>
+                      {packs.map((pack) => (
+                        <LibraryCard
+                          key={pack.slug}
+                          artist={pack.artist}
+                          title={t(pack.title, language)}
+                          price={pack.price}
+                          currency={currency}
+                          image={pack.image}
+                          href={pack.href}
+                          acquired={pack.hasAccess}
+                        />
+                      ))}
+                    </Section>
                   )}
                 </motion.div>
               )}

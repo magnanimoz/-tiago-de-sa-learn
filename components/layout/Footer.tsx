@@ -78,7 +78,7 @@ export default function Footer() {
   ) {
     if (pathname === href) {
       event.preventDefault();
-      window.location.href = href;
+      window.location.assign(href);
     }
   }
 

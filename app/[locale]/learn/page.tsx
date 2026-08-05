@@ -65,11 +65,9 @@ export default async function LearnPage() {
       featured: product.featured ?? false,
 
       href:
-        product.type === "song"
-          ? `/learn/${product.slug}`
-          : product.type === "course"
-            ? `/courses/${product.slug}`
-            : `/packs/${product.slug}`,
+        product.type === "pack"
+          ? `/packs/${product.slug}`
+          : `/learn/${product.slug}`,
       hasAccess: purchasedKeys.has(`${product.type}:${product.slug}`),
     })) ?? [];
 

@@ -16,7 +16,7 @@ export const learnText = {
   },
 
   searchPlaceholder: {
-    pt: "Pesquisar músicas, artistas ou cursos...",
+    pt: "Buscar músicas, artistas ou cursos...",
     en: "Search songs, artists or courses...",
   },
 
@@ -53,5 +53,20 @@ export const learnText = {
   myPurchases: {
     pt: "Minhas compras",
     en: "My purchases",
+  },
+
+  resultsFor: {
+    pt: "Resultados para",
+    en: "Results for",
+  },
+
+  noResultsTitle: {
+    pt: "Nenhum resultado encontrado",
+    en: "No results found",
+  },
+
+  noResultsDescription: {
+    pt: "Tente buscar por outro título, artista ou tipo de conteúdo.",
+    en: "Try searching for another title, artist, or type of content.",
   },
 } satisfies Record<string, TranslatedText>;

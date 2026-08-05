@@ -62,9 +62,6 @@ export default function Header() {
           transition-[background-color,border-color,backdrop-filter]
           duration-[400ms]
           ease-[cubic-bezier(0,0,1,1)]
-          backdrop-blur-[24px]
-          backdrop-saturate-125
-          [-webkit-backdrop-filter:blur(24px)_saturate(1.25)]
         "
         style={{
           transition:
@@ -87,12 +84,15 @@ export default function Header() {
       >
         <div
           aria-hidden="true"
-          className="
+          className={`
             pointer-events-none
             absolute
             inset-0
             overflow-hidden
-          "
+            transition-opacity
+            duration-[400ms]
+            ${headerVisible ? "opacity-100" : "opacity-0"}
+          `}
         >
           <div
             className="

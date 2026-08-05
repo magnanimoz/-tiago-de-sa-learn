@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 
 import Container from "@/components/ui/Container";
-import LessonExperience from "@/components/learn/LessonExperience";
+import ContentProductExperience from "@/components/learn/ContentProductExperience";
 import { createClient } from "@/lib/supabase/server";
 import { userHasAccessToContent } from "@/lib/access/user-has-access-to-content";
 import { isRouteLocale, routeLocaleToLanguage } from "@/lib/i18n";
 import LessonAccessBackground from "@/components/learn/LessonAccessBackground";
+import type { ContentProduct } from "@/types/content-product";
 
 type LessonPageProps = {
   params: Promise<{
@@ -59,6 +60,10 @@ export default async function LessonPage({ params }: LessonPageProps) {
   }
 
   if (!product) {
+    notFound();
+  }
+
+  if (product.type !== "song" && product.type !== "course") {
     notFound();
   }
 
@@ -117,7 +122,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
     console.error("Erro ao carregar catálogo das aulas:", catalogError);
   }
 
-  const lesson = {
+  const productData: ContentProduct = {
+    type: product.type,
     slug: product.slug,
 
     title: {
@@ -137,12 +143,24 @@ export default async function LessonPage({ params }: LessonPageProps) {
       usd: Number(product.price_usd),
     },
 
-    difficulty: product.difficulty as "Beginner" | "Intermediate" | "Advanced",
+    difficulty:
+      product.difficulty === "Beginner" ||
+      product.difficulty === "Intermediate" ||
+      product.difficulty === "Advanced"
+        ? product.difficulty
+        : "Beginner",
 
     duration: product.duration ?? "",
-    key: product.musical_key ?? "",
-    tuning: product.tuning ?? "",
-    capo: product.capo ?? "No capo",
+
+    key:
+      product.type === "song" ? (product.musical_key ?? undefined) : undefined,
+
+    tuning:
+      product.type === "song"
+        ? (product.tuning as ContentProduct["tuning"])
+        : undefined,
+
+    capo: product.type === "song" ? (product.capo ?? "No capo") : undefined,
 
     image: product.image ?? "",
     previewVideo: product.preview_video ?? "",
@@ -228,8 +246,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
           </div>
         )}
         <Container>
-          <LessonExperience
-            lesson={lesson}
+          <ContentProductExperience
+            product={productData}
             language={language}
             hasAccess={hasAccess}
           />

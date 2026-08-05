@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, LoaderCircle, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,15 +19,14 @@ export default function EditableField({
   const [isSaving, setIsSaving] = useState(false);
   const [currentValue, setCurrentValue] = useState(value);
 
-  useEffect(() => {
-    if (!isEditing) {
-      setCurrentValue(value);
-    }
-  }, [value, isEditing]);
-
   const trimmedValue = currentValue.trim();
   const hasChanges = trimmedValue !== value.trim();
   const canSave = hasChanges && Boolean(trimmedValue);
+
+  function handleStartEditing() {
+    setCurrentValue(value);
+    setIsEditing(true);
+  }
 
   async function handleSave() {
     if (!canSave || isSaving) {
@@ -71,7 +70,7 @@ export default function EditableField({
         {!isEditing && (
           <button
             type="button"
-            onClick={() => setIsEditing(true)}
+            onClick={handleStartEditing}
             className="rounded-md p-1 text-white/40 transition hover:bg-white/5 hover:text-white"
             aria-label={`Editar ${label}`}
           >
@@ -119,7 +118,7 @@ export default function EditableField({
           </div>
         </div>
       ) : (
-        <p className="mt-2 break-words text-base text-white">{currentValue}</p>
+        <p className="mt-2 break-words text-base text-white">{value}</p>
       )}
     </div>
   );

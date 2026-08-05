@@ -2,6 +2,18 @@ export {};
 
 type MercadoPagoLocale = "pt-BR" | "en-US";
 
+type MercadoPagoCardFormFieldStyle = {
+  color?: string;
+  fontSize?: string;
+  fontFamily?: string;
+};
+
+type MercadoPagoCardFormField = {
+  id: string;
+  placeholder?: string;
+  style?: MercadoPagoCardFormFieldStyle;
+};
+
 type MercadoPagoCardFormData = {
   token: string;
   issuerId: string;
@@ -13,64 +25,35 @@ type MercadoPagoCardFormData = {
   cardholderEmail: string;
 };
 
+type MercadoPagoPaymentMethod = {
+  id?: string;
+};
+
+type MercadoPagoPaymentMethodsResponse = {
+  results?: MercadoPagoPaymentMethod[];
+};
+
 type MercadoPagoCardFormConfiguration = {
   amount: string;
   iframe?: boolean;
 
   form: {
     id: string;
-
-    cardNumber: {
-      id: string;
-      placeholder?: string;
-    };
-
-    expirationDate: {
-      id: string;
-      placeholder?: string;
-    };
-
-    securityCode: {
-      id: string;
-      placeholder?: string;
-    };
-
-    cardholderName: {
-      id: string;
-      placeholder?: string;
-    };
-
-    issuer: {
-      id: string;
-      placeholder?: string;
-    };
-
-    installments: {
-      id: string;
-      placeholder?: string;
-    };
-
-    identificationType: {
-      id: string;
-      placeholder?: string;
-    };
-
-    identificationNumber: {
-      id: string;
-      placeholder?: string;
-    };
-
-    cardholderEmail: {
-      id: string;
-      placeholder?: string;
-    };
+    cardNumber: MercadoPagoCardFormField;
+    expirationDate: MercadoPagoCardFormField;
+    securityCode: MercadoPagoCardFormField;
+    cardholderName: MercadoPagoCardFormField;
+    issuer: MercadoPagoCardFormField;
+    installments: MercadoPagoCardFormField;
+    identificationType: MercadoPagoCardFormField;
+    identificationNumber: MercadoPagoCardFormField;
+    cardholderEmail: MercadoPagoCardFormField;
   };
 
   callbacks: {
+    onBinChange?: (bin: string) => void | Promise<void>;
     onFormMounted?: (error?: unknown) => void;
-
-    onSubmit?: (event: SubmitEvent) => void | Promise<void>;
-
+    onSubmit?: (event: Event) => void | Promise<void>;
     onFetching?: (resource: string) => void | (() => void);
   };
 };
@@ -95,6 +78,10 @@ type MercadoPagoInstance = {
   cardForm: (
     configuration: MercadoPagoCardFormConfiguration,
   ) => MercadoPagoCardForm;
+
+  getPaymentMethods: (params: {
+    bin: string;
+  }) => Promise<MercadoPagoPaymentMethodsResponse>;
 };
 
 type MercadoPagoConstructor = new (

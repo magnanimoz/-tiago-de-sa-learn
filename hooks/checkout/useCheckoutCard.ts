@@ -286,7 +286,7 @@ export function useCheckoutCard({
           advancedFraudPrevention: true,
         });
 
-        const cardForm = mp.cardForm({
+        const cardFormOptions: Parameters<typeof mp.cardForm>[0] = {
           amount: String(amount),
           iframe: true,
           form: {
@@ -354,7 +354,7 @@ export function useCheckoutCard({
               }
 
               try {
-                const response = await (mp as any).getPaymentMethods({ bin });
+                const response = await mp.getPaymentMethods({ bin });
                 const paymentMethod = response.results?.[0];
 
                 setCardBrand(paymentMethod?.id ?? null);
@@ -497,7 +497,9 @@ export function useCheckoutCard({
               };
             },
           },
-        } as any);
+        };
+
+        const cardForm = mp.cardForm(cardFormOptions);
 
         cardFormRef.current = cardForm;
       } catch (error) {

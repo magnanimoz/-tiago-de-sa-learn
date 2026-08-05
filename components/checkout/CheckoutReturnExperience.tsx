@@ -35,29 +35,30 @@ export default function CheckoutReturnExperience({
   previewAutoApprove = false,
 }: CheckoutReturnExperienceProps) {
   const router = useRouter();
-  const [currentStatus, setCurrentStatus] = useState<ReturnStatus>(status);
 
-  useEffect(() => {
-    setCurrentStatus(status);
-  }, [status]);
+  const [previewStatus, setPreviewStatus] = useState<ReturnStatus | null>(null);
+
+  const currentStatus =
+    status === "pending" && previewStatus ? previewStatus : status;
 
   useEffect(() => {
     if (
       process.env.NODE_ENV !== "development" ||
       !previewAutoApprove ||
-      currentStatus !== "pending"
+      status !== "pending" ||
+      previewStatus !== null
     ) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
-      setCurrentStatus("approved");
+      setPreviewStatus("approved");
     }, 5000);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [currentStatus, previewAutoApprove]);
+  }, [previewAutoApprove, previewStatus, status]);
 
   function handleStartLesson() {
     if (destinationHref) {
