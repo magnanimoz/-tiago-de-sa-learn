@@ -40,6 +40,7 @@ function DropdownItem({
   return (
     <button
       type="button"
+      role="menuitem"
       onClick={() => {
         onClick?.();
         dropdown?.close();
@@ -100,30 +101,59 @@ const Dropdown: DropdownComponent = function Dropdown({
 
   return (
     <div ref={ref} className="relative">
-      <div onClick={() => setOpen((value) => !value)}>{trigger}</div>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setOpen((value) => !value);
+          }
+        }}
+      >
+        {trigger}
+      </div>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+            role="menu"
+            initial={{
+              opacity: 0,
+              y: -6,
+              scale: 0.98,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }}
+            exit={{
+              opacity: 0,
+              y: -4,
+              scale: 0.98,
+            }}
             transition={{
               duration: 0.18,
               ease: [0.22, 1, 0.36, 1],
             }}
             className={`
-                absolute
-                mt-3
-                overflow-hidden
-                rounded-xl
-                border
-                border-border
-                bg-surface
-                shadow-xl
-                ${align === "right" ? "right-0" : "left-0"}
-                ${width}
-                ${className}
+              absolute
+              z-50
+              mt-3
+              origin-top
+              overflow-hidden
+              rounded-xl
+              border
+              border-border
+              bg-[#171717]
+              shadow-[0_18px_45px_rgba(0,0,0,0.24)]
+              ${align === "right" ? "right-0" : "left-0"}
+              ${width}
+              ${className}
             `}
           >
             <DropdownContext.Provider value={contextValue}>
