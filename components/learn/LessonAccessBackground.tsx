@@ -1,23 +1,25 @@
 "use client";
 
 import { useRef } from "react";
+
 import { useBlobParallax } from "@/hooks/useBlobParallax";
 
 export default function LessonAccessBackground() {
   const blobRef = useRef<HTMLDivElement>(null);
 
   useBlobParallax(blobRef, {
-    speed: 0.22,
-    inertia: 0.035,
+    speed: -0.04,
+    inertia: 0.012,
+    scale: 0.004,
   });
 
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-[#0d0d0f]">
+    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#070809]">
       <div
         className="absolute inset-0 opacity-0 animate-lesson-darken"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.6))",
+            "linear-gradient(to bottom, rgba(0,0,0,0.12), rgba(0,0,0,0.28))",
         }}
       />
 
@@ -26,7 +28,7 @@ export default function LessonAccessBackground() {
           absolute
           left-[59%]
           top-[-3rem]
-          h-[55rem]
+          h-[65rem]
           w-[62rem]
           -translate-x-1/2
         "
@@ -37,7 +39,7 @@ export default function LessonAccessBackground() {
               className="lesson-amber-float h-full w-full"
               style={{
                 background:
-                  "radial-gradient(ellipse, rgba(196,113,49,0.5) 0%, rgba(132,70,30,0.4) 34%, rgba(80,40,20,0.24) 56%, transparent 74%)",
+                  "radial-gradient(ellipse, rgba(196,113,49,0.24) 0%, rgba(132,70,30,0.16) 36%, rgba(80,40,20,0.08) 58%, transparent 76%)",
               }}
             />
           </div>

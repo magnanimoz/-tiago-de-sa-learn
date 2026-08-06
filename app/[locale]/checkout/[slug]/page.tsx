@@ -107,6 +107,10 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
 
   return (
     <main className="relative min-h-screen overflow-x-clip px-0 pb-8 pt-8 sm:pb-10 sm:pt-10">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-20 bg-[#070809]"
+      />
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden animate-checkout-darken">
         <div className="checkout-blob checkout-blob-pink absolute left-[-14rem] top-0 h-[32rem] w-[32rem]" />
 
@@ -163,7 +167,18 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
               />
             }
             paymentPanel={
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
+              <div
+                className="
+                  relative
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-white/[0.11]
+                  bg-white/[0.04]
+                  shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_18px_50px_rgba(0,0,0,0.22)]
+                  backdrop-blur-xl
+                "
+              >
                 <div className="pt-4 sm:pt-6">
                   <CheckoutPaymentForm
                     slug={product.slug}
@@ -172,9 +187,9 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
                   />
                 </div>
 
-                <div className="border-t border-white/10 px-6 py-4 sm:px-8">
+                <div className="border-t border-white/[0.08] bg-white/[0.012] px-6 py-4 sm:px-8">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.04] text-white/40">
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/[0.07] bg-white/[0.045] text-white/52">
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 24 24"
@@ -192,13 +207,13 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-white/55">
+                      <p className="text-xs font-medium text-white/65">
                         {language === "pt"
                           ? "Pagamento seguro"
                           : "Secure payment"}
                       </p>
 
-                      <p className="mt-1 text-[11px] leading-5 text-white/30">
+                      <p className="mt-1 text-[11px] leading-5 text-white/40">
                         {language === "pt"
                           ? `Seus dados são processados com segurança pelo ${paymentProviderLabel}.`
                           : `Your payment details are securely processed by ${paymentProviderLabel}.`}

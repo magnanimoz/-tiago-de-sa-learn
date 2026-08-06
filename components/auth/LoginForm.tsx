@@ -14,6 +14,23 @@ interface LoginFormProps {
   isSignUp: boolean;
 }
 
+function getSafeRedirectPath(
+  requestedPath: string | null,
+  fallbackPath: string,
+) {
+  if (!requestedPath) {
+    return fallbackPath;
+  }
+
+  const isInternalPath =
+    requestedPath.startsWith("/") &&
+    !requestedPath.startsWith("//") &&
+    !requestedPath.includes("://") &&
+    !requestedPath.includes("\\");
+
+  return isInternalPath ? requestedPath : fallbackPath;
+}
+
 export default function LoginForm({ isSignUp }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,19 +104,12 @@ export default function LoginForm({ isSignUp }: LoginFormProps) {
     setPassword("");
     setIsSubmitting(false);
 
-    const redirectParam = searchParams.get("redirect");
-    const defaultDestination = localePath("/learn", routeLocale);
+    const fallbackPath = localePath("/learn", routeLocale);
 
-    let destination = defaultDestination;
-
-    if (
-      redirectParam &&
-      redirectParam.startsWith("/") &&
-      !redirectParam.startsWith("//") &&
-      !redirectParam.includes("://")
-    ) {
-      destination = redirectParam;
-    }
+    const destination = getSafeRedirectPath(
+      searchParams.get("next"),
+      fallbackPath,
+    );
 
     router.replace(destination);
     router.refresh();

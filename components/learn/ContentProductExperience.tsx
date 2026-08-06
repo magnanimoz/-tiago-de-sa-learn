@@ -52,8 +52,11 @@ export default function ContentProductExperience({
         : "Unlock lesson";
 
   function handleUnlock() {
+    const productPath = localePath(`/learn/${product.slug}`, routeLocale);
+
     if (!isAuthenticated) {
-      router.push(localePath("/login", routeLocale));
+      const loginPath = localePath("/login", routeLocale);
+      router.push(`${loginPath}?next=${encodeURIComponent(productPath)}`);
       return;
     }
 

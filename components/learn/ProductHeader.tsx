@@ -116,18 +116,28 @@ export default function ProductHeader({
       <div className="flex items-center gap-2">
         <Play className="h-4 w-4 text-magenta" />
 
-        <p className="text-sm font-medium text-white/45">{previewLabel}</p>
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-white/40">
+          {previewLabel}
+        </p>
       </div>
 
-      <h1 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+      <h1
+        className="
+          mt-4
+          text-[28px]
+          font-semibold
+          leading-[1.08]
+          tracking-[-0.04em]
+          text-white
+          sm:text-[34px]
+        "
+      >
         {t(product.title, language)}
       </h1>
 
-      {product.artist && (
-        <p className="mt-1 text-sm text-white/45">{product.artist}</p>
-      )}
+      <p className="mt-2 text-sm font-medium text-white/52">{product.artist}</p>
 
-      <div className="mt-6 space-y-3">
+      <div className="mt-7 space-y-2.5">
         <ContentMetadataItem icon={Clock3}>
           {product.duration}
         </ContentMetadataItem>

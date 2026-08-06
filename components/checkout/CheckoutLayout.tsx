@@ -9,6 +9,8 @@ type CheckoutLayoutProps = {
   paymentPanel: ReactNode;
 };
 
+const softEase = [0.22, 1, 0.36, 1] as const;
+
 export default function CheckoutLayout({
   header,
   productSummary,
@@ -29,7 +31,7 @@ export default function CheckoutLayout({
       <motion.div
         initial={{
           opacity: 0,
-          y: 16,
+          y: 12,
           filter: "blur(4px)",
         }}
         animate={{
@@ -39,7 +41,7 @@ export default function CheckoutLayout({
         }}
         transition={{
           duration: 0.8,
-          ease: [0.22, 1, 0.36, 1],
+          ease: softEase,
         }}
         className="mb-8"
       >
@@ -51,7 +53,7 @@ export default function CheckoutLayout({
           <motion.div
             initial={{
               opacity: 0,
-              y: 22,
+              y: 12,
               filter: "blur(4px)",
             }}
             animate={{
@@ -60,9 +62,9 @@ export default function CheckoutLayout({
               filter: "blur(0px)",
             }}
             transition={{
-              duration: 1.8,
-              delay: 0.2,
-              ease: [0.18, 0.9, 0.2, 1],
+              duration: 0.95,
+              delay: 0.14,
+              ease: softEase,
             }}
             style={{
               y: smoothProductOffset,
@@ -75,8 +77,8 @@ export default function CheckoutLayout({
         <motion.div
           initial={{
             opacity: 0,
-            y: 26,
-            filter: "blur(6px)",
+            y: 12,
+            filter: "blur(4px)",
           }}
           animate={{
             opacity: 1,
@@ -84,9 +86,9 @@ export default function CheckoutLayout({
             filter: "blur(0px)",
           }}
           transition={{
-            duration: 2.3,
-            delay: 0.4,
-            ease: [0.18, 0.9, 0.2, 1],
+            duration: 1,
+            delay: 0.22,
+            ease: softEase,
           }}
         >
           {paymentPanel}

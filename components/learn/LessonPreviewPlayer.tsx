@@ -1,19 +1,50 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Lock } from "lucide-react";
 
 type LessonPreviewPlayerProps = {
   previewUrl: string;
   language: "pt" | "en";
+  onUnlock: () => void;
 };
 
 export default function LessonPreviewPlayer({
   previewUrl,
   language,
+  onUnlock,
 }: LessonPreviewPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isFinished, setIsFinished] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video || !previewUrl) {
+      return;
+    }
+
+    video.volume = 0.3;
+    video.muted = false;
+
+    const startPreview = async () => {
+      try {
+        await video.play();
+        setIsMuted(false);
+      } catch {
+        video.muted = true;
+        setIsMuted(true);
+
+        try {
+          await video.play();
+        } catch {}
+      }
+    };
+
+    void startPreview();
+  }, [previewUrl]);
 
   function handleEnded() {
     setIsFinished(true);
@@ -30,14 +61,54 @@ export default function LessonPreviewPlayer({
   }
 
   return (
-    <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-black">
+    <div className="relative aspect-video overflow-hidden bg-[#090a0c]">
       <video
         ref={videoRef}
         src={previewUrl}
         controls={!isFinished}
+        playsInline
+        preload="metadata"
         onEnded={handleEnded}
         className="h-full w-full object-cover"
       />
+
+      {isMuted && !isFinished && (
+        <button
+          type="button"
+          onClick={() => {
+            const video = videoRef.current;
+
+            if (!video) {
+              return;
+            }
+
+            video.muted = false;
+            video.volume = 0.3;
+            setIsMuted(false);
+          }}
+          className="
+            absolute
+            bottom-4
+            right-4
+            rounded-full
+            border
+            border-white/12
+            bg-black/55
+            px-3
+            py-1.5
+            text-xs
+            font-medium
+            text-white/75
+            backdrop-blur-lg
+            transition-colors
+            duration-300
+            hover:bg-black/70
+            hover:text-white
+          "
+        >
+          {language === "pt" ? "Ativar som" : "Turn on sound"}
+        </button>
+      )}
 
       <AnimatePresence>
         {isFinished && (
@@ -58,7 +129,7 @@ export default function LessonPreviewPlayer({
                 duration: 0.8,
                 ease: "easeOut",
               }}
-              className="absolute inset-0 bg-black/85 backdrop-blur-sm"
+              className="absolute inset-0 bg-[#070809]/80 backdrop-blur-sm"
             />
 
             <motion.div
@@ -80,16 +151,30 @@ export default function LessonPreviewPlayer({
               className="relative z-10 max-w-md text-center"
             >
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{
-                  duration: 0.5,
-                  delay: 0.35,
-                  ease: "easeOut",
+                  type: "spring",
+                  stiffness: 140,
+                  damping: 22,
+                  mass: 1,
+                  delay: 0.3,
                 }}
-                className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-lg text-white/60"
+                className="
+                  mx-auto
+                  flex
+                  h-12
+                  w-12
+                  items-center
+                  justify-center
+                  rounded-full
+                  border
+                  border-white/10
+                  bg-white/[0.05]
+                  text-white/60
+                "
               >
-                🔒
+                <Lock className="h-4 w-4" strokeWidth={1.8} />
               </motion.div>
 
               <motion.h2
@@ -140,12 +225,38 @@ export default function LessonPreviewPlayer({
                   {language === "pt" ? "Assistir novamente" : "Watch again"}
                 </button>
 
-                <button
+                <motion.button
                   type="button"
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-black transition hover:bg-white/85"
+                  onClick={onUnlock}
+                  whileHover={{ scale: 1.015 }}
+                  whileTap={{ scale: 0.985 }}
+                  transition={{
+                    type: "spring",
+
+                    stiffness: 180,
+
+                    damping: 24,
+
+                    mass: 0.9,
+                  }}
+                  className="
+                    inline-flex
+                    min-h-11
+                    items-center
+                    justify-center
+                    rounded-xl
+                    bg-white
+                    px-5
+                    text-sm
+                    font-semibold
+                    text-black
+                    transition-colors
+                    duration-300
+                    hover:bg-white/90
+                  "
                 >
                   {language === "pt" ? "Desbloquear aula" : "Unlock lesson"}
-                </button>
+                </motion.button>
               </motion.div>
             </motion.div>
           </motion.div>

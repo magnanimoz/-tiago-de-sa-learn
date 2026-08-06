@@ -7,6 +7,7 @@ import { userHasAccessToContent } from "@/lib/access/user-has-access-to-content"
 import { isRouteLocale, routeLocaleToLanguage } from "@/lib/i18n";
 import LessonAccessBackground from "@/components/learn/LessonAccessBackground";
 import type { ContentProduct } from "@/types/content-product";
+import LearnAmbientBackground from "@/components/learn/LearnAmbientBackground";
 
 type LessonPageProps = {
   params: Promise<{
@@ -205,46 +206,11 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   return (
     <>
-      <main className="relative overflow-x-clip pb-32 pt-29">
-        {hasAccess ? (
-          <LessonAccessBackground />
-        ) : (
-          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-            <div
-              className="
-                absolute
-                left-[-14rem]
-                top-0
-                h-[32rem]
-                w-[32rem]
-                scale-90
-                opacity-0
-                animate-[blobFadeIn_1.2s_ease-out_forwards]
-              "
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(230, 0, 126, 0.18) 0%, rgba(230, 0, 126, 0.08) 38%, transparent 72%)",
-              }}
-            />
+      {!hasAccess && <LearnAmbientBackground compact />}
 
-            <div
-              className="
-                absolute
-                right-[-12rem]
-                top-[24rem]
-                h-[30rem]
-                w-[30rem]
-                scale-90
-                opacity-0
-                animate-[blobFadeIn_1.2s_ease-out_250ms_forwards]
-              "
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(59, 130, 246, 0.08) 38%, transparent 72%)",
-              }}
-            />
-          </div>
-        )}
+      <main className="relative overflow-x-clip pb-32 pt-29">
+        {hasAccess && <LessonAccessBackground />}
+
         <Container>
           <ContentProductExperience
             product={productData}
