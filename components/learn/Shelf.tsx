@@ -57,8 +57,6 @@ function AnimatedShelfItem({
   );
 }
 
-const shelfEase = [0.16, 1, 0.3, 1] as const;
-
 export default function Shelf({
   title,
   children,

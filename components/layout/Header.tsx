@@ -20,7 +20,10 @@ const links = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [headerVisible, setHeaderVisible] = useState(false);
+  const [pageScrolled, setPageScrolled] = useState(false);
+  const [learnCaptured, setLearnCaptured] = useState(false);
+
+  const headerVisible = pageScrolled && !learnCaptured;
 
   const { language, routeLocale } = useSettings();
   const { isAuthenticated, isLoading } = useAuth();
@@ -35,7 +38,7 @@ export default function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setHeaderVisible(window.scrollY > 0);
+      setPageScrolled(window.scrollY > 0);
     };
 
     handleScroll();
@@ -46,6 +49,22 @@ export default function Header() {
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleLearnScrollMode = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        captured: boolean;
+      }>;
+
+      setLearnCaptured(customEvent.detail.captured);
+    };
+
+    window.addEventListener("learn-scroll-mode", handleLearnScrollMode);
+
+    return () => {
+      window.removeEventListener("learn-scroll-mode", handleLearnScrollMode);
     };
   }, []);
 

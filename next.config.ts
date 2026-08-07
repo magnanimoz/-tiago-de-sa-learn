@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["villages-pulling-hiking-minutes.trycloudflare.com"],
+  allowedDevOrigins: ["predict-below-qualified-resist.trycloudflare.com"],
 };
 
 export default nextConfig;
