@@ -1,559 +1,154 @@
 "use client";
 
-import { type RefObject, useCallback, useEffect, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-type ScrollMode = "shelves" | "released";
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+}
 
 type UseLearnScrollControllerOptions = {
   activeIndex: number;
   enabled: boolean;
   itemCount: number;
   anchorRef: RefObject<HTMLDivElement | null>;
+  itemRefs: RefObject<Array<HTMLDivElement | null>>;
   onIndexChange: (index: number) => void;
 };
 
-const WHEEL_THRESHOLD = 26;
-const TOUCH_THRESHOLD = 52;
+function getCaptureOffset() {
+  return window.matchMedia("(min-width: 640px)").matches ? 112 : 96;
+}
 
-const TRANSITION_LOCK_DURATION = 620;
-const RECAPTURE_TOLERANCE = 4;
-const RECAPTURE_MOMENTUM_LOCK = 320;
+function applyItemTransforms(
+  items: Array<HTMLDivElement | null>,
+  virtualIndex: number,
+) {
+  items.forEach((el, index) => {
+    if (!el) {
+      return;
+    }
+
+    const distance = index - virtualIndex;
+    const clampedDistance = Math.min(Math.abs(distance), 1);
+
+    gsap.set(el, {
+      yPercent: distance * 100,
+      opacity: 1 - clampedDistance * 0.75,
+      scale: 1 - clampedDistance * 0.018,
+      filter: `blur(${clampedDistance * 10}px)`,
+      pointerEvents: clampedDistance > 0.5 ? "none" : "auto",
+    });
+  });
+}
 
 export function useLearnScrollController({
   activeIndex,
   enabled,
   itemCount,
   anchorRef,
+  itemRefs,
   onIndexChange,
 }: UseLearnScrollControllerOptions) {
-  const modeRef = useRef<ScrollMode>(
-    enabled && itemCount > 1 ? "shelves" : "released",
-  );
-
-  const activeIndexRef = useRef(activeIndex);
-  const enabledRef = useRef(enabled);
-  const itemCountRef = useRef(itemCount);
   const onIndexChangeRef = useRef(onIndexChange);
-
-  const pageLockedRef = useRef(false);
-
-  const transitionLockedRef = useRef(false);
-  const transitionTimeoutRef = useRef<number | null>(null);
-
-  const gestureConsumedRef = useRef(false);
-  const gestureIdleTimeoutRef = useRef<number | null>(null);
-  const wheelAccumulatorRef = useRef(0);
-  const lastWheelDirectionRef = useRef<1 | -1 | null>(null);
-  const recaptureMomentumLockedRef = useRef(false);
-  const recaptureMomentumTimeoutRef = useRef<number | null>(null);
-
-  const lastShelfReachedAtRef = useRef(0);
-  const automaticReleaseTimeoutRef = useRef<number | null>(null);
-
-  const touchStartYRef = useRef<number | null>(null);
-  const touchConsumedRef = useRef(false);
-
-  const previousScrollYRef = useRef(0);
-  const previousAnchorTopRef = useRef<number | null>(null);
+  const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
+  const lastEmittedIndexRef = useRef(activeIndex);
+  const isSyncingFromOutsideRef = useRef(false);
 
   useEffect(() => {
-    activeIndexRef.current = activeIndex;
-    enabledRef.current = enabled;
-    itemCountRef.current = itemCount;
     onIndexChangeRef.current = onIndexChange;
-  }, [activeIndex, enabled, itemCount, onIndexChange]);
+  }, [onIndexChange]);
 
-  const lockPage = useCallback(() => {
-    if (pageLockedRef.current) {
-      return;
-    }
-
-    document.documentElement.style.overflowY = "hidden";
-    document.body.style.overflowY = "hidden";
-    document.documentElement.style.overscrollBehavior = "none";
-    document.body.style.overscrollBehavior = "none";
-
-    pageLockedRef.current = true;
-  }, []);
-
-  const unlockPage = useCallback(() => {
-    if (!pageLockedRef.current) {
-      return;
-    }
-
-    document.documentElement.style.overflowY = "";
-    document.body.style.overflowY = "";
-    document.documentElement.style.overscrollBehavior = "";
-    document.body.style.overscrollBehavior = "";
-
-    pageLockedRef.current = false;
-  }, []);
-
-  const clearAutomaticRelease = useCallback(() => {
-    if (automaticReleaseTimeoutRef.current !== null) {
-      window.clearTimeout(automaticReleaseTimeoutRef.current);
-      automaticReleaseTimeoutRef.current = null;
-    }
-  }, []);
-
-  const setHeaderCaptured = useCallback((captured: boolean) => {
-    window.dispatchEvent(
-      new CustomEvent("learn-scroll-mode", {
-        detail: {
-          captured,
-        },
-      }),
-    );
-  }, []);
-
-  const release = useCallback(() => {
-    clearAutomaticRelease();
-
-    modeRef.current = "released";
-    wheelAccumulatorRef.current = 0;
-    gestureConsumedRef.current = false;
-    transitionLockedRef.current = false;
-    lastWheelDirectionRef.current = null;
-
-    recaptureMomentumLockedRef.current = false;
-
-    if (recaptureMomentumTimeoutRef.current !== null) {
-      window.clearTimeout(recaptureMomentumTimeoutRef.current);
-      recaptureMomentumTimeoutRef.current = null;
-    }
-
-    unlockPage();
-    setHeaderCaptured(false);
-
+  useEffect(() => {
     const anchor = anchorRef.current;
 
-    previousAnchorTopRef.current = anchor?.getBoundingClientRect().top ?? null;
-
-    previousScrollYRef.current = window.scrollY;
-  }, [anchorRef, clearAutomaticRelease, setHeaderCaptured, unlockPage]);
-
-  const scheduleAutomaticRelease = useCallback(() => {
-    clearAutomaticRelease();
-
-    if (
-      activeIndexRef.current !== itemCountRef.current - 1 ||
-      modeRef.current !== "shelves"
-    ) {
+    if (!enabled || itemCount <= 1 || !anchor) {
       return;
     }
 
-    const elapsed = performance.now() - lastShelfReachedAtRef.current;
+    const lastIndex = itemCount - 1;
 
-    const delay = Math.max(0, TRANSITION_LOCK_DURATION - elapsed);
+    applyItemTransforms(itemRefs.current ?? [], activeIndex);
 
-    automaticReleaseTimeoutRef.current = window.setTimeout(() => {
-      automaticReleaseTimeoutRef.current = null;
+    const st = ScrollTrigger.create({
+      trigger: anchor,
+      start: () => `top top+=${getCaptureOffset()}`,
+      end: () => `+=${lastIndex * window.innerHeight}`,
+      pin: true,
+      pinSpacing: true,
+      anticipatePin: 1,
+      snap: {
+        snapTo: (progress) => Math.round(progress * lastIndex) / lastIndex,
+        duration: 0.35,
+        ease: "power1.inOut",
+      },
+      onUpdate: (self) => {
+        const virtualIndex = self.progress * lastIndex;
 
-      if (
-        modeRef.current !== "shelves" ||
-        activeIndexRef.current !== itemCountRef.current - 1
-      ) {
-        return;
-      }
+        applyItemTransforms(itemRefs.current ?? [], virtualIndex);
 
-      release();
-    }, delay);
-  }, [clearAutomaticRelease, release]);
+        if (isSyncingFromOutsideRef.current) {
+          return;
+        }
 
-  const registerGestureActivity = useCallback(() => {
-    if (gestureIdleTimeoutRef.current !== null) {
-      window.clearTimeout(gestureIdleTimeoutRef.current);
-    }
+        const nextIndex = Math.round(virtualIndex);
 
-    gestureIdleTimeoutRef.current = window.setTimeout(() => {
-      gestureConsumedRef.current = false;
-      wheelAccumulatorRef.current = 0;
-      gestureIdleTimeoutRef.current = null;
-    }, 180);
-  }, []);
+        if (nextIndex !== lastEmittedIndexRef.current) {
+          lastEmittedIndexRef.current = nextIndex;
+          onIndexChangeRef.current(nextIndex);
+        }
+      },
+    });
 
-  const lockTransition = useCallback(() => {
-    transitionLockedRef.current = true;
+    scrollTriggerRef.current = st;
 
-    if (transitionTimeoutRef.current !== null) {
-      window.clearTimeout(transitionTimeoutRef.current);
-    }
-
-    transitionTimeoutRef.current = window.setTimeout(() => {
-      transitionLockedRef.current = false;
-      transitionTimeoutRef.current = null;
-
-      if (activeIndexRef.current === itemCountRef.current - 1) {
-        scheduleAutomaticRelease();
-      }
-    }, TRANSITION_LOCK_DURATION);
-  }, [scheduleAutomaticRelease]);
-
-  const setShelf = useCallback(
-    (nextIndex: number) => {
-      const count = itemCountRef.current;
-
-      if (nextIndex < 0 || nextIndex >= count) {
-        return;
-      }
-
-      if (nextIndex === activeIndexRef.current) {
-        return;
-      }
-
-      activeIndexRef.current = nextIndex;
-      onIndexChangeRef.current(nextIndex);
-
-      gestureConsumedRef.current = true;
-
-      if (nextIndex === count - 1) {
-        lastShelfReachedAtRef.current = performance.now();
-      } else {
-        clearAutomaticRelease();
-        lastShelfReachedAtRef.current = 0;
-      }
-
-      lockTransition();
-
-      if (nextIndex === count - 1) {
-        scheduleAutomaticRelease();
-      }
-    },
-    [clearAutomaticRelease, lockTransition, scheduleAutomaticRelease],
-  );
-
-  const lockRecaptureMomentum = useCallback(() => {
-    recaptureMomentumLockedRef.current = true;
-
-    if (recaptureMomentumTimeoutRef.current !== null) {
-      window.clearTimeout(recaptureMomentumTimeoutRef.current);
-    }
-
-    recaptureMomentumTimeoutRef.current = window.setTimeout(() => {
-      recaptureMomentumLockedRef.current = false;
-      recaptureMomentumTimeoutRef.current = null;
-
-      gestureConsumedRef.current = false;
-      wheelAccumulatorRef.current = 0;
-      lastWheelDirectionRef.current = null;
-    }, RECAPTURE_MOMENTUM_LOCK);
-  }, []);
-
-  const capture = useCallback(
-    (consumeCurrentGesture = false) => {
-      if (!enabledRef.current || itemCountRef.current <= 1) {
-        return;
-      }
-
-      clearAutomaticRelease();
-
-      modeRef.current = "shelves";
-      wheelAccumulatorRef.current = 0;
-      transitionLockedRef.current = false;
-      lastWheelDirectionRef.current = null;
-
-      gestureConsumedRef.current = consumeCurrentGesture;
-      touchConsumedRef.current = consumeCurrentGesture;
-
-      if (consumeCurrentGesture) {
-        lockRecaptureMomentum();
-      }
-
-      lockPage();
-      setHeaderCaptured(true);
-
-      if (
-        activeIndexRef.current === itemCountRef.current - 1 &&
-        !consumeCurrentGesture
-      ) {
-        lastShelfReachedAtRef.current = performance.now();
-        scheduleAutomaticRelease();
-      }
-    },
-    [
-      clearAutomaticRelease,
-      lockPage,
-      lockRecaptureMomentum,
-      scheduleAutomaticRelease,
-      setHeaderCaptured,
-    ],
-  );
+    return () => {
+      st.kill();
+      scrollTriggerRef.current = null;
+    };
+  }, [anchorRef, enabled, itemCount, itemRefs]);
 
   useEffect(() => {
-    if (enabled && itemCount > 1) {
-      capture();
+    const st = scrollTriggerRef.current;
+
+    if (!st || itemCount <= 1) {
       return;
     }
 
-    release();
-  }, [capture, enabled, itemCount, release]);
+    if (activeIndex === lastEmittedIndexRef.current) {
+      return;
+    }
+
+    const lastIndex = itemCount - 1;
+    const targetProgress = activeIndex / lastIndex;
+    const targetScrollY = st.start + targetProgress * (st.end - st.start);
+
+    isSyncingFromOutsideRef.current = true;
+    lastEmittedIndexRef.current = activeIndex;
+
+    gsap.to(window, {
+      scrollTo: targetScrollY,
+      duration: 0.35,
+      ease: "power1.inOut",
+      onUpdate: () => {
+        const virtualIndex = st.progress * lastIndex;
+        applyItemTransforms(itemRefs.current ?? [], virtualIndex);
+      },
+      onComplete: () => {
+        isSyncingFromOutsideRef.current = false;
+      },
+    });
+  }, [activeIndex, itemCount, itemRefs]);
 
   useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      if (!enabledRef.current || itemCountRef.current <= 1) {
-        return;
-      }
+    const handleResize = () => ScrollTrigger.refresh();
 
-      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
-        return;
-      }
-
-      if (modeRef.current === "released") {
-        if (event.deltaY >= 0) {
-          return;
-        }
-
-        const anchor = anchorRef.current;
-
-        if (!anchor) {
-          return;
-        }
-
-        const captureOffset = window.matchMedia("(min-width: 640px)").matches
-          ? 112
-          : 96;
-
-        const anchorTop = anchor.getBoundingClientRect().top;
-
-        const isStillAtShelfPosition =
-          Math.abs(anchorTop - captureOffset) <= RECAPTURE_TOLERANCE;
-
-        if (!isStillAtShelfPosition) {
-          return;
-        }
-
-        event.preventDefault();
-
-        capture(true);
-      }
-
-      event.preventDefault();
-
-      if (recaptureMomentumLockedRef.current) {
-        lockRecaptureMomentum();
-        return;
-      }
-
-      registerGestureActivity();
-
-      const wheelDirection: 1 | -1 = event.deltaY > 0 ? 1 : -1;
-
-      if (
-        lastWheelDirectionRef.current !== null &&
-        wheelDirection !== lastWheelDirectionRef.current
-      ) {
-        gestureConsumedRef.current = false;
-        wheelAccumulatorRef.current = 0;
-
-        if (gestureIdleTimeoutRef.current !== null) {
-          window.clearTimeout(gestureIdleTimeoutRef.current);
-          gestureIdleTimeoutRef.current = null;
-        }
-      }
-
-      lastWheelDirectionRef.current = wheelDirection;
-
-      if (transitionLockedRef.current || gestureConsumedRef.current) {
-        return;
-      }
-
-      const currentIndex = activeIndexRef.current;
-      const lastIndex = itemCountRef.current - 1;
-
-      wheelAccumulatorRef.current += event.deltaY;
-
-      if (Math.abs(wheelAccumulatorRef.current) < WHEEL_THRESHOLD) {
-        return;
-      }
-
-      const direction = wheelAccumulatorRef.current > 0 ? 1 : -1;
-
-      wheelAccumulatorRef.current = 0;
-
-      const nextIndex = currentIndex + direction;
-
-      if (nextIndex < 0 || nextIndex > lastIndex) {
-        gestureConsumedRef.current = true;
-        return;
-      }
-
-      setShelf(nextIndex);
-    };
-
-    window.addEventListener("wheel", handleWheel, {
-      passive: false,
-      capture: true,
-    });
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("wheel", handleWheel, true);
+      window.removeEventListener("resize", handleResize);
     };
-  }, [
-    anchorRef,
-    capture,
-    lockRecaptureMomentum,
-    registerGestureActivity,
-    setShelf,
-  ]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        modeRef.current !== "released" ||
-        !enabledRef.current ||
-        itemCountRef.current <= 1
-      ) {
-        previousScrollYRef.current = window.scrollY;
-        return;
-      }
-
-      const anchor = anchorRef.current;
-
-      if (!anchor) {
-        previousScrollYRef.current = window.scrollY;
-        return;
-      }
-
-      const currentScrollY = window.scrollY;
-      const scrollingUp = currentScrollY < previousScrollYRef.current;
-
-      const currentAnchorTop = anchor.getBoundingClientRect().top;
-
-      const previousAnchorTop = previousAnchorTopRef.current;
-
-      const captureOffset = window.matchMedia("(min-width: 640px)").matches
-        ? 112
-        : 96;
-
-      if (
-        scrollingUp &&
-        activeIndexRef.current === itemCountRef.current - 1 &&
-        previousAnchorTop !== null &&
-        previousAnchorTop < captureOffset - RECAPTURE_TOLERANCE &&
-        currentAnchorTop >= captureOffset - RECAPTURE_TOLERANCE
-      ) {
-        capture(true);
-      }
-
-      previousAnchorTopRef.current = currentAnchorTop;
-      previousScrollYRef.current = currentScrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [anchorRef, capture]);
-
-  useEffect(() => {
-    const handleTouchStart = (event: TouchEvent) => {
-      if (event.touches.length !== 1) {
-        return;
-      }
-
-      touchStartYRef.current = event.touches[0].clientY;
-      touchConsumedRef.current = false;
-    };
-
-    const handleTouchMove = (event: TouchEvent) => {
-      if (
-        !enabledRef.current ||
-        itemCountRef.current <= 1 ||
-        touchStartYRef.current === null ||
-        event.touches.length !== 1
-      ) {
-        return;
-      }
-
-      if (modeRef.current === "released") {
-        return;
-      }
-
-      const currentY = event.touches[0].clientY;
-
-      const deltaY = touchStartYRef.current - currentY;
-
-      event.preventDefault();
-
-      if (
-        transitionLockedRef.current ||
-        touchConsumedRef.current ||
-        Math.abs(deltaY) < TOUCH_THRESHOLD
-      ) {
-        return;
-      }
-
-      const currentIndex = activeIndexRef.current;
-      const lastIndex = itemCountRef.current - 1;
-
-      const direction = deltaY > 0 ? 1 : -1;
-      const nextIndex = currentIndex + direction;
-
-      if (nextIndex < 0 || nextIndex > lastIndex) {
-        touchConsumedRef.current = true;
-        return;
-      }
-
-      touchConsumedRef.current = true;
-      setShelf(nextIndex);
-    };
-
-    const handleTouchEnd = () => {
-      touchStartYRef.current = null;
-      touchConsumedRef.current = false;
-    };
-
-    window.addEventListener("touchstart", handleTouchStart, {
-      passive: true,
-      capture: true,
-    });
-
-    window.addEventListener("touchmove", handleTouchMove, {
-      passive: false,
-      capture: true,
-    });
-
-    window.addEventListener("touchend", handleTouchEnd, {
-      passive: true,
-      capture: true,
-    });
-
-    window.addEventListener("touchcancel", handleTouchEnd, {
-      passive: true,
-      capture: true,
-    });
-
-    return () => {
-      window.removeEventListener("touchstart", handleTouchStart, true);
-
-      window.removeEventListener("touchmove", handleTouchMove, true);
-
-      window.removeEventListener("touchend", handleTouchEnd, true);
-
-      window.removeEventListener("touchcancel", handleTouchEnd, true);
-    };
-  }, [setShelf]);
-
-  useEffect(() => {
-    return () => {
-      unlockPage();
-      clearAutomaticRelease();
-      setHeaderCaptured(false);
-
-      if (transitionTimeoutRef.current !== null) {
-        window.clearTimeout(transitionTimeoutRef.current);
-      }
-
-      if (gestureIdleTimeoutRef.current !== null) {
-        window.clearTimeout(gestureIdleTimeoutRef.current);
-      }
-
-      if (recaptureMomentumTimeoutRef.current !== null) {
-        window.clearTimeout(recaptureMomentumTimeoutRef.current);
-      }
-    };
-  }, [clearAutomaticRelease, setHeaderCaptured, unlockPage]);
+  }, []);
 }

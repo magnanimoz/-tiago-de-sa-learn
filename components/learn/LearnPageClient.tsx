@@ -91,7 +91,13 @@ export default function LearnPageClient({
 
   const pinkBlobRef = useRef<HTMLDivElement>(null);
   const blueBlobRef = useRef<HTMLDivElement>(null);
+
+  // Agora é a âncora do ScrollTrigger: pina o bloco inteiro
+  // (título + busca + menu de seções + prateleiras), não só as
+  // prateleiras. É por isso que o cabeçalho fica imóvel durante a
+  // navegação e só libera ao chegar na última/primeira prateleira.
   const learnStickyRef = useRef<HTMLDivElement>(null);
+  const shelfItemRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const learnLabel = t(learnText.learn, language);
 
@@ -194,14 +200,6 @@ export default function LearnPageClient({
 
     setActiveSection(nextSection.id);
   }
-
-  useLearnScrollController({
-    activeIndex,
-    enabled: !search.trim(),
-    itemCount: sectionItems.length,
-    anchorRef: learnStickyRef,
-    onIndexChange: handleViewportIndexChange,
-  });
 
   const sections = [
     purchasedProducts.length > 0 && (
@@ -310,6 +308,18 @@ export default function LearnPageClient({
     ),
   ].filter(Boolean);
 
+  // Pina learnStickyRef (cabeçalho + busca + menu + prateleiras) como
+  // um bloco só. Desabilitado durante a busca, já que aí não existe
+  // navegação por prateleira nenhuma — a página deve rolar normal.
+  useLearnScrollController({
+    activeIndex,
+    enabled: sections.length > 1 && !search.trim(),
+    itemCount: sections.length,
+    anchorRef: learnStickyRef,
+    itemRefs: shelfItemRefs,
+    onIndexChange: handleViewportIndexChange,
+  });
+
   return (
     <>
       <div
@@ -376,7 +386,13 @@ export default function LearnPageClient({
     lg:pb-8
   "
           >
-            <div ref={learnStickyRef} className="sticky top-24 z-30 sm:top-28">
+            {/*
+              Antes era "sticky top-24 z-30 sm:top-28". Agora quem
+              mantém este bloco fixo é o próprio ScrollTrigger (pin),
+              então não precisa mais de position: sticky — os dois
+              mecanismos disputariam o controle da posição.
+            */}
+            <div ref={learnStickyRef} className="relative z-30">
               <div
                 className="
         grid
@@ -675,7 +691,7 @@ export default function LearnPageClient({
                         ease: "easeOut",
                       }}
                     >
-                      <LearnViewport activeIndex={activeIndex}>
+                      <LearnViewport itemRefs={shelfItemRefs}>
                         {sections}
                       </LearnViewport>
                     </motion.div>
